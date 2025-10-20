@@ -1,85 +1,83 @@
-/* Reset di base e font globali */
+/* :root definisce le variabili CSS globali per il tema */
 :root {
-  --primary-color: #2563eb;
-  --secondary-color: #4f46e5;
-  --background-color: #f0f2f5;
-  --card-background: #ffffff;
-  --text-color: #1f2937;
-  --text-light: #6b7280;
-  --border-color: #e5e7eb;
-  --success-color: #10b981;
-  --danger-color: #ef4444;
-  --warning-color: #f59e0b;
-  --font-family: 'Inter', sans-serif;
+  /* Tema ispirato a Bet365 */
+  --primary-color: #1E823A; /* Verde Bet365 */
+  --primary-color-rgb: 30, 130, 58;
+  --secondary-color: #FFDF1B; /* Giallo/Oro Bet365 */
+  
+  --bg-color: #121212; /* Sfondo molto scuro */
+  --card-bg-color: #282828; /* Grigio scuro per le card */
+  --input-bg-color: #333; /* Sfondo per input */
+  
+  --text-color: #E0E0E0; /* Testo quasi bianco */
+  --text-color-light: #B0B0B0; /* Testo più scuro per label e placeholder */
+  
+  --border-color: #444;
+  --shadow-small: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.3);
+  
+  --win-color: #4caf50;
+  --loss-color: #f44336;
+  --pending-color: #ff9800;
+  
+  --border-radius: 12px;
+  --border-radius-small: 8px;
 }
 
+/* Reset e stili di base */
 body {
   margin: 0;
-  font-family: var(--font-family);
-  background-color: var(--background-color);
-  color: var(--text-color);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
 }
 
-/* Contenitore principale dell'app */
+/* Stili per l'intera applicazione */
 .app-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 20px;
 }
 
 main {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 30px;
 }
 
-/* Stili per le sezioni */
-.dashboard-section, .form-section, .list-section {
-  background-color: var(--card-background);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+section {
+  width: 100%;
 }
 
-/* Stili comuni per i bottoni */
-button {
-  font-family: var(--font-family);
-  border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+/* Stili per le sezioni principali */
+.dashboard-section,
+.form-section,
+.list-section {
+  padding: 0;
 }
 
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+/* Aggiunta di un po' di stile ai titoli di sezione, se presenti */
+h2 {
+  color: var(--secondary-color);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.btn-primary {
-  background-color: var(--primary-color);
-  color: white;
+/* Stili per la scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
-.btn-primary:hover {
-  background-color: #1d4ed8;
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
 }
-
-.btn-secondary {
-    background-color: #e5e7eb;
-    color: #374151;
+::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
 }
-.btn-secondary:hover {
-    background-color: #d1d5db;
-}
-
-.btn-danger {
-  background-color: var(--danger-color);
-  color: white;
-}
-.btn-danger:hover {
-  background-color: #dc2626;
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
 }
