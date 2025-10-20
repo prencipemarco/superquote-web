@@ -51,10 +51,24 @@ function App() {
     
     setTrendColor(slope >= 0 ? 'var(--win-color)' : 'var(--loss-color)');
     
+    // Predizione: Estende il trend nel futuro per la predizione (es. 5 punti futuri)
+    const lastPlayDate = sortedPlays.length > 0 ? new Date(sortedPlays[sortedPlays.length - 1].data) : new Date();
+    const futurePoints = [];
+    for (let i = 1; i <= 5; i++) {
+        const futureDate = new Date(lastPlayDate);
+        futureDate.setDate(lastPlayDate.getDate() + i * 3); // Aggiunge qualche giorno per punto
+        futurePoints.push({
+            data: futureDate.toISOString().split('T')[0],
+            saldo: null, // Saldo reale è nullo nel futuro
+            trend: slope * (regressionPoints.length - 1 + i) + intercept,
+        });
+    }
+
     const combinedData = balanceData.map((d, index) => ({
       ...d,
       trend: slope * index + intercept,
-    }));
+    })).concat(futurePoints);
+
     setLineChartData(combinedData);
 
     // 2. Dati per Grafico a Torta (Esiti)
@@ -70,12 +84,12 @@ function App() {
 
     // 3. Dati per Grafico a Colonne (Mensile)
     const monthlyData = currentPlays.reduce((acc, play) => {
-      const month = new Date(play.data).toLocaleString('it-IT', { month: 'short', year: '2-digit' });
-      if (!acc[month]) {
-        acc[month] = { name: month, importo: 0, vincita: 0, date: new Date(play.data) };
+      const monthYear = new Date(play.data).toLocaleString('it-IT', { month: 'short', year: 'numeric' });
+      if (!acc[monthYear]) {
+        acc[monthYear] = { name: monthYear, importo: 0, vincita: 0, date: new Date(play.data) };
       }
-      acc[month].importo += play.importo;
-      acc[month].vincita += play.vincita;
+      acc[monthYear].importo += play.importo;
+      acc[monthYear].vincita += play.vincita;
       return acc;
     }, {});
     
@@ -118,12 +132,90 @@ function App() {
   }, []);
   
   // Le altre funzioni (handleAddPlay, handleUpdatePlay, ecc.) rimangono invariate
-  const handleAddPlay = async (play) => { const { error } = await supabase.from('plays').insert([play]); if (!error) getPlays(); };
-  const handleUpdatePlay = async (play) => { const { error } = await supabase.from('plays').update(play).eq('id', play.id); if (!error) { setEditingPlay(null); getPlays(); } };
-  const handleDeletePlay = async (id) => { if (window.confirm("Sei sicuro?")) { const { error } = await supabase.from('plays').delete().eq('id', id); if (!error) getPlays(); }};
-  const handleEditClick = (play) => { setEditingPlay(play); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); };
-  const handleExportPlays = () => { /* ... logica invariata ... */ };
-  const handleImportPlays = () => { /* ... logica invariata ... */ };
+  const handleAddPlay = async (play) => { 
+    const { data, error } = await supabase.from('plays').insert([play]).select();
+    if (!error) getPlays(); 
+    else console.error("Errore nell'aggiunta:", error);
+  };
+  const handleUpdatePlay = async (play) => { 
+    const { data, error } = await supabase.from('plays').update(play).eq('id', play.id).select();
+    if (!error) { 
+      setEditingPlay(null); 
+      getPlays(); 
+    } else console.error("Errore nell'aggiornamento:", error);
+  };
+  const handleDeletePlay = async (id) => { 
+    if (window.confirm("Sei sicuro?")) { 
+      const { error } = await supabase.from('plays').delete().eq('id', id); 
+      if (!error) getPlays(); 
+      else console.error("Errore nell'eliminazione:", error);
+    }
+  };
+  const handleEditClick = (play) => { 
+    setEditingPlay(play); 
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); 
+  };
+  
+  const handleExportPlays = () => {
+    if (plays.length === 0) {
+      alert("Nessuna giocata da esportare.");
+      return;
+    }
+    const headers = ['id', 'data', 'risultato', 'quota', 'importo', 'vincita', 'esito'];
+    const headerString = headers.join(',');
+    const csvRows = plays.map(row => 
+        headers.map(fieldName => `"${String(row[fieldName] ?? '').replace(/"/g, '""')}"`).join(',')
+    );
+    const csvContent = [headerString, ...csvRows].join('\r\n');
+    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'giocate.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportPlays = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const csv = event.target.result;
+        const lines = csv.split(/\r\n|\n/);
+        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        const playsToInsert = lines.slice(1).map(line => {
+          const data = line.split(',');
+          return headers.reduce((obj, nextKey, index) => {
+            if (nextKey === 'id' || !nextKey) return obj;
+            let value = (data[index] || '').trim().replace(/"/g, '');
+            if (['quota', 'importo', 'vincita'].includes(nextKey)) {
+                value = parseFloat(value) || 0;
+            }
+            obj[nextKey] = value;
+            return obj;
+          }, {});
+        }).filter(p => p.data);
+
+        if(playsToInsert.length > 0 && window.confirm(`Stai per importare ${playsToInsert.length} giocate. Continuare?`)){
+            const { error } = await supabase.from('plays').insert(playsToInsert);
+            if(error) alert('Errore durante l\'importazione: ' + error.message);
+            else {
+                alert('Importazione completata con successo!');
+                getPlays();
+            }
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
 
 
   return (
@@ -133,7 +225,7 @@ function App() {
         <section className="dashboard-section">
           <StatsDashboard plays={plays} />
           <PlaysChart data={lineChartData} trendColor={trendColor} />
-          <div className="charts-grid">
+          <div className="charts-grid"> {/* Nuovo wrapper per i due grafici */}
             <OutcomePieChart data={pieChartData} />
             <MonthlyBarChart data={barChartData} />
           </div>

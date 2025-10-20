@@ -1,35 +1,48 @@
 .stats-dashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 4 colonne responsive */
+  gap: 20px;
+  margin-bottom: 30px; /* Spazio sotto la dashboard */
 }
 
 .stat-card {
-  background-color: #f9fafb;
-  padding: 1rem;
-  border-radius: 10px;
+  background-color: var(--card-bg-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-small);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  border: 1px solid var(--border-color);
+  min-height: 100px;
 }
 
-.stat-card h4 {
-  margin: 0 0 0.5rem 0;
-  color: var(--text-light);
+.stat-label {
   font-size: 0.9rem;
-  text-transform: uppercase;
+  color: var(--text-color-light);
+  margin-bottom: 8px;
+  font-weight: 500;
 }
 
-.stat-card p {
-  margin: 0;
-  font-size: 1.75rem;
+.stat-value {
+  font-size: 1.8rem;
   font-weight: 700;
-  color: var(--primary-color);
+  color: var(--text-color); /* Colore di default per i valori */
 }
 
-.text-win {
-  color: var(--success-color);
+/* Colori specifici per il profitto */
+.stat-value.win {
+  color: var(--win-color); /* Verde per profitto positivo */
 }
-.text-loss {
-  color: var(--danger-color);
+
+.stat-value.loss {
+  color: var(--loss-color); /* Rosso per profitto negativo */
 }
+
+@media (max-width: 768px) {
+  .stats-dashboard {
+    grid-template-columns: 1fr; /* Una colonna su schermi piccoli */
+  }
+}
+

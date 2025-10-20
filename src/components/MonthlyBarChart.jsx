@@ -9,7 +9,7 @@ import {
   Legend,
   Bar,
 } from 'recharts';
-import './MonthlyBarChart.css';
+import './MonthlyBarChart.css'; // Mantiene il riferimento al CSS
 
 function MonthlyBarChart({ data }) {
   if (!data || data.length === 0) {
@@ -32,12 +32,15 @@ function MonthlyBarChart({ data }) {
             cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
             contentStyle={{ 
               backgroundColor: 'var(--card-bg-color)', 
-              border: '1px solid var(--border-color)'
+              border: '1px solid var(--border-color)', 
+              borderRadius: 'var(--border-radius-small)' 
             }}
+            labelStyle={{ color: 'var(--text-color-light)' }}
+            itemStyle={{ fontWeight: 'bold', color: 'var(--text-color)' }}
           />
           <Legend />
-          <Bar dataKey="importo" name="Importo Scommesso" fill="var(--loss-color)" />
-          <Bar dataKey="vincita" name="Importo Vinto" fill="var(--win-color)" />
+          <Bar dataKey="importo" name="Importo Scommesso" fill="var(--loss-color)" barSize={30} /> {/* barSize ridotto */}
+          <Bar dataKey="vincita" name="Importo Vinto" fill="var(--win-color)" barSize={30} /> {/* barSize ridotto */}
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -45,3 +48,4 @@ function MonthlyBarChart({ data }) {
 }
 
 export default MonthlyBarChart;
+
