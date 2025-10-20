@@ -9,8 +9,8 @@ function Header({ onImport, onExport }) {
         <p>Monitora le tue giocate e analizza i risultati</p>
       </div>
       <div className="header-actions">
-        <button onClick={onImport} className="btn-secondary">Importa JSON</button>
-        <button onClick={onExport} className="btn-secondary">Esporta JSON</button>
+        <button onClick={onImport} className="btn-secondary">Importa CSV</button>
+        <button onClick={onExport} className="btn-secondary">Esporta CSV</button>
       </div>
     </header>
   );
