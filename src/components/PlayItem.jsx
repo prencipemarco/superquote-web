@@ -16,7 +16,6 @@ function PlayItem({ play, onEdit, onDelete }) {
   
   const [isSwiped, setIsSwiped] = useState(false);
   const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
   const itemRef = useRef(null);
 
   const profitto = vincita - importo;
@@ -31,20 +30,26 @@ function PlayItem({ play, onEdit, onDelete }) {
 
   const handleTouchMove = (e) => {
     const currentX = e.targetTouches[0].clientX;
-    const diff = currentX - touchStartX.current;
-    if (diff < 0 && Math.abs(diff) < 150) { // Limita lo swipe verso sinistra
+    let diff = currentX - touchStartX.current;
+    // Permette di muovere solo verso sinistra e non oltre i 150px
+    if (diff < 0 && Math.abs(diff) < 150) {
         itemRef.current.style.transform = `translateX(${diff}px)`;
+    }
+    // Permette di tornare indietro se si è già in swipe
+    else if (diff > 0 && isSwiped){
+        const newX = -140 + diff;
+        itemRef.current.style.transform = `translateX(${newX}px)`;
     }
   };
 
   const handleTouchEnd = () => {
-    itemRef.current.style.transition = 'transform 0.3s ease'; // Ri-applica la transizione
+    itemRef.current.style.transition = 'transform 0.3s ease';
     const diff = touchStartX.current - itemRef.current.getBoundingClientRect().left;
 
-    if (diff > 50) { // Threshold per attivare lo swipe
+    if (diff > 60) { // Threshold per attivare lo swipe
       setIsSwiped(true);
       itemRef.current.style.transform = 'translateX(-140px)';
-    } else {
+    } else { // Altrimenti chiude
       setIsSwiped(false);
       itemRef.current.style.transform = 'translateX(0px)';
     }
@@ -72,28 +77,42 @@ function PlayItem({ play, onEdit, onDelete }) {
         <div 
           ref={itemRef}
           className={`play-item ${isSwiped ? 'swiped' : ''}`}
-          style={{ borderLeft: `5px solid ${esitoColor}` }}
+          style={{ '--border-color-dynamic': esitoColor }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onClick={handleCardClick}
         >
-            <div className="play-item-main">
-                <span className="play-risultato">{risultato}</span>
-                <span className={`play-profitto ${profittoClass}`}>
-                    {profitto >= 0 ? '+' : ''}{profitto.toFixed(2)}€
-                </span>
+            {/* Contenuto per la VISTA MOBILE A CARD */}
+            <div className="mobile-card-content">
+                <div className="play-item-main">
+                    <span className="play-risultato">{risultato}</span>
+                    <span className={`play-profitto ${profittoClass}`}>{profitto >= 0 ? '+' : ''}{profitto.toFixed(2)}€</span>
+                </div>
+                <div className="play-item-details">
+                    <div><span>Importo</span><strong>{importo.toFixed(2)}€</strong></div>
+                    <div><span>Quota</span><strong>x{quota.toFixed(2)}</strong></div>
+                    <div><span>Vincita</span><strong>{vincita.toFixed(2)}€</strong></div>
+                </div>
+                <div className="play-item-footer">
+                    <span className="play-date">{formattedDate}</span>
+                    <span className={`esito-badge esito-${esito.toLowerCase().replace(' ', '-')}`}>{esito}</span>
+                </div>
             </div>
 
-            <div className="play-item-details">
-                <div><span>Importo</span><strong>{importo.toFixed(2)}€</strong></div>
-                <div><span>Quota</span><strong>x{quota.toFixed(2)}</strong></div>
-                <div><span>Vincita</span><strong>{vincita.toFixed(2)}€</strong></div>
-            </div>
-            
-            <div className="play-item-footer">
-                <span className="play-date">{formattedDate}</span>
-                <span className={`esito-badge esito-${esito.toLowerCase().replace(' ', '-')}`}>{esito}</span>
+            {/* Contenuto per la VISTA DESKTOP A TABELLA */}
+            <div className="desktop-row-content">
+                <div>{formattedDate}</div>
+                <div>{risultato}</div>
+                <div>x{quota.toFixed(2)}</div>
+                <div>{importo.toFixed(2)}€</div>
+                <div>{vincita.toFixed(2)}€</div>
+                <div className={profittoClass}>{profitto >= 0 ? '+' : ''}{profitto.toFixed(2)}€</div>
+                <div className="esito-cell"><span className={`esito-badge esito-${esito.toLowerCase().replace(' ', '-')}`}>{esito}</span></div>
+                <div className="play-actions">
+                    <button onClick={() => onEdit(play)} className="action-button edit"><EditIcon /></button>
+                    <button onClick={() => onDelete(play.id)} className="action-button delete"><DeleteIcon /></button>
+                </div>
             </div>
       </div>
     </div>
@@ -101,3 +120,4 @@ function PlayItem({ play, onEdit, onDelete }) {
 }
 
 export default PlayItem;
+

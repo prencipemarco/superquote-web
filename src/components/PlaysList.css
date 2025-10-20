@@ -1,8 +1,6 @@
 .plays-list-container {
-  background-color: var(--card-bg-color);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-small);
-  overflow: hidden; /* Per contenere i bordi arrotondati */
+  /* Rimosso lo sfondo e l'ombra per rendere il contenitore 'trasparente'
+     e far risaltare le singole card sottostanti. */
 }
 
 .plays-list-header {
@@ -11,8 +9,10 @@
   grid-template-columns: 1fr 2fr 0.8fr 1fr 1fr 1fr 1fr 1fr; 
   align-items: center;
   padding: 12px 20px;
-  background-color: var(--input-bg-color); /* Sfondo leggermente diverso per l'header */
-  border-bottom: 2px solid var(--border-color);
+  background-color: var(--card-bg-color); /* L'header mantiene il suo sfondo */
+  border-radius: var(--border-radius-small);
+  box-shadow: var(--shadow-small);
+  margin-bottom: 15px; /* Spazio tra header e la prima card */
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--text-color-light);

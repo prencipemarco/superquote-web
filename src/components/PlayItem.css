@@ -1,22 +1,27 @@
-/* --- STRUTTURA PER LO SWIPE --- */
+/* --- STRUTTURA PER LO SWIPE (valida solo su mobile) --- */
 .play-item-wrapper {
   position: relative;
-  overflow: hidden; /* Nasconde i pulsanti che escono */
-  background-color: var(--card-bg-color);
-  margin-bottom: 10px;
+  margin-bottom: 15px; /* Aumentato per più spazio verticale */
   border-radius: var(--border-radius-small);
+  overflow: hidden; /* Nasconde i pulsanti che escono */
+  box-shadow: var(--shadow-medium); /* Aggiunta ombra per effetto scheda */
 }
 
 .play-item {
   background-color: var(--card-bg-color);
-  padding: 15px;
   position: relative;
   z-index: 2;
   transition: transform 0.3s ease;
   cursor: pointer;
-  border-left: 5px solid var(--border-color); /* Bordo di default */
 }
 
+/* --- VISTA MOBILE (default) --- */
+.play-item {
+  padding: 15px;
+  /* Usa una variabile CSS per il bordo dinamico */
+  border-left: 5px solid var(--border-color-dynamic); 
+}
+.desktop-row-content { display: none; } /* Nasconde la vista desktop */
 .play-actions-swipe {
   position: absolute;
   top: 0;
@@ -41,14 +46,10 @@
 }
 .action-swipe-button.edit { background-color: var(--secondary-color); color: #000; }
 .action-swipe-button.delete { background-color: var(--loss-color); }
-.action-swipe-button:hover {
-  filter: brightness(1.1);
-}
-.action-swipe-button svg {
-  margin-bottom: 5px;
-}
+.action-swipe-button:hover { filter: brightness(1.1); }
+.action-swipe-button svg { margin-bottom: 5px; }
 
-/* --- NUOVO LAYOUT CARD --- */
+/* LAYOUT CARD MOBILE */
 .play-item-main {
   display: flex;
   justify-content: space-between;
@@ -58,15 +59,10 @@
 .play-risultato {
   font-weight: 600;
   font-size: 1.1rem;
-  color: var(--text-color);
   line-height: 1.3;
   margin-right: 10px;
 }
-.play-profitto {
-  font-size: 1.2rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
+.play-profitto { font-size: 1.2rem; font-weight: 700; flex-shrink: 0; }
 .profitto-positivo { color: var(--win-color); }
 .profitto-negativo { color: var(--loss-color); }
 
@@ -80,30 +76,12 @@
   border-bottom: 1px solid var(--border-color);
   margin-bottom: 10px;
 }
-.play-item-details div {
-  display: flex;
-  flex-direction: column;
-}
-.play-item-details span {
-  font-size: 0.8rem;
-  color: var(--text-color-light);
-  margin-bottom: 4px;
-}
-.play-item-details strong {
-  font-size: 1rem;
-  color: var(--text-color);
-  font-weight: 600;
-}
+.play-item-details div { display: flex; flex-direction: column; }
+.play-item-details span { font-size: 0.8rem; color: var(--text-color-light); margin-bottom: 4px; }
+.play-item-details strong { font-size: 1rem; font-weight: 600; }
 
-.play-item-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.play-date {
-  font-size: 0.8rem;
-  color: var(--text-color-light);
-}
+.play-item-footer { display: flex; justify-content: space-between; align-items: center; }
+.play-date { font-size: 0.8rem; color: var(--text-color-light); }
 
 /* Badge Esito */
 .esito-badge {
@@ -118,33 +96,49 @@
 .esito-persa { background-color: var(--loss-color); }
 .esito-in-attesa { background-color: var(--pending-color); }
 
-/* --- VISUALIZZAZIONE DESKTOP (Ripristina la vista a tabella) --- */
+/* --- VISTA DESKTOP (@media query) --- */
 @media (min-width: 901px) {
   .play-item-wrapper {
     margin: 0;
     border-radius: 0;
+    overflow: visible; /* Rende visibile l'hover */
+    box-shadow: none; /* Rimuove l'ombra nella vista a tabella */
   }
   .play-item {
-    display: grid;
-    grid-template-columns: 1fr 2fr 0.8fr 1fr 1fr 1fr 1fr 1fr;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--border-color);
-    border-left: none; /* Rimuove il bordo colorato su desktop */
-    margin-bottom: 0;
+    border-left: none; /* Rimuove il bordo colorato */
+    padding: 0; /* Il padding sarà gestito dai figli */
+    cursor: default;
   }
   .play-item:hover {
     background-color: var(--input-bg-color);
   }
-  /* Nasconde la struttura a card e mostra i dati in linea */
-  .play-item-main, .play-item-details, .play-item-footer, .play-actions-swipe {
-    display: contents; /* Fa comportare gli elementi come se non avessero un wrapper */
+  .play-actions-swipe, .mobile-card-content { display: none; } /* Nasconde la vista mobile */
+
+  .desktop-row-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr 0.8fr 1fr 1fr 1fr 1fr 1fr; /* Layout a tabella */
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
   }
-  /* Mostra i pulsanti di azione standard su desktop */
+  
+  .esito-cell { text-align: center; }
+  
   .play-actions {
     display: flex;
     justify-content: center;
     gap: 10px;
   }
+  .action-button {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    color: var(--text-color-light);
+    transition: color 0.2s ease, transform 0.1s ease;
+  }
+  .action-button:hover { transform: scale(1.1); }
+  .action-button.edit:hover { color: var(--secondary-color); }
+  .action-button.delete:hover { color: var(--loss-color); }
 }
 
