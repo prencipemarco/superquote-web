@@ -1,28 +1,73 @@
 .filters-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Spazia gli elementi */
   align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+  gap: 20px; /* Spazio tra i gruppi di filtri */
+  padding: 15px 20px;
+  background-color: var(--card-bg-color); /* Colore di sfondo più chiaro */
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-small);
+  margin-bottom: 20px; /* Distanza dalla lista delle giocate */
+  flex-wrap: wrap; /* Per schermi piccoli */
 }
 
-.filters-container h3 {
-  margin: 0;
-  color: var(--text-color);
-}
-
-.filter-options {
+.filter-group {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  flex-direction: column; /* Label sopra il select */
+  gap: 8px; /* Spazio tra label e select */
+  flex-grow: 1; /* Permette ai gruppi di occupare spazio */
+  min-width: 150px; /* Larghezza minima per evitare che si comprimano troppo */
 }
 
-.filter-options select,
-.filter-options input {
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  font-family: var(--font-family);
+.filter-group label {
   font-size: 0.9rem;
+  color: var(--text-color-light);
+  font-weight: 500;
+  margin-bottom: 4px; /* Spazio sotto la label */
 }
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.filters-container select {
+  width: 100%;
+  padding: 10px 30px 10px 12px; /* Aggiunto padding a destra per l'icona */
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
+  font-size: 1rem;
+  appearance: none; /* Rimuove lo stile di default della freccia */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filters-container select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+  outline: none;
+}
+
+.select-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-color-light);
+  pointer-events: none; /* Permette di cliccare sul select anche sull'icona */
+  font-size: 0.7rem;
+}
+
+/* Media queries per schermi più piccoli */
+@media (max-width: 600px) {
+  .filters-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+}
+
