@@ -8,7 +8,7 @@ const SheetsIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="n
 
 function Header({ onImport, onArchive }) { // onExport rinominato in onArchive
   // SOSTITUISCI QUESTO LINK CON IL LINK AL TUO FOGLIO GOOGLE
-  const googleSheetLink = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit";
+  const googleSheetLink = "https://docs.google.com/spreadsheets/d/1lW2M9NrvoaDfkWo2jjkuqk1a0KuHxfEmKmVTKda1rlo/edit?usp=sharing";
 
   return (
     <header className="app-header">
