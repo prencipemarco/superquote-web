@@ -61,27 +61,40 @@
 
 .header-button svg {
   color: #fff;
+  flex-shrink: 0; /* Impedisce all'icona di rimpicciolirsi */
 }
 
-/* --- FIX PER IL MOBILE --- */
+/* --- FIX PER IL MOBILE (NUOVO) --- */
 @media (max-width: 768px) {
   .app-header {
     flex-direction: column;
-    align-items: stretch;
-  }
-
-  .header-title {
-    text-align: center; /* Centra il titolo */
+    align-items: center; /* Centra il titolo */
   }
 
   .header-actions {
-    flex-direction: column; /* Impila i pulsanti verticalmente */
-    align-items: stretch; /* Fa sì che i pulsanti occupino tutta la larghezza */
+    flex-direction: row; /* Rimette i pulsanti in linea */
+    justify-content: center; /* Centra la riga di pulsanti */
     width: 100%;
+    gap: 12px; /* Spazio tra i pulsanti quadrati */
   }
 
   .header-button {
-    width: 100%; /* Forza la larghezza intera */
-    justify-content: center; /* Centra il testo e l'icona nel pulsante */
+    width: 60px;  /* Larghezza fissa per il quadrato */
+    height: 60px; /* Altezza fissa per il quadrato */
+    padding: 0;   /* Rimuove il padding */
+    justify-content: center; /* Centra l'icona all'interno */
+    flex-grow: 0; /* Impedisce ai pulsanti di allargarsi */
+  }
+
+  /* Nasconde il testo del pulsante */
+  .header-button span {
+    display: none;
+  }
+
+  /* Centra l'icona (rimuovendo il gap) */
+  .header-button svg {
+    margin: 0;
+    width: 28px; /* Dimensione icona leggermente più grande */
+    height: 28px;
   }
 }
