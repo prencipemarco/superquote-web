@@ -1,0 +1,52 @@
+.site-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--card-background);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-content {
+  text-align: left;
+}
+
+.site-header h1 {
+  color: var(--primary-color);
+  margin: 0;
+  font-size: 2.2rem;
+}
+
+.site-header p {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .header-actions button {
+    flex-grow: 1;
+  }
+}
+
