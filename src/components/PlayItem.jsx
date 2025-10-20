@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import './PlayItem.css';
 
 // Icone per le azioni
-const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 S0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>;
+const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>; // <-- ERRORE CORRETTO QUI
 const DeleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
 
 const ESITO_COLORS = {
@@ -31,13 +31,10 @@ function PlayItem({ play, onEdit, onDelete }) {
     const currentX = e.targetTouches[0].clientX;
     const diffX = currentX - touchStartCoords.current.x;
 
-    // Disabilita transizione durante il movimento per reattività
     itemRef.current.style.transition = 'none';
 
-    // Movimento solo se si sta andando a sinistra da chiuso, o se si è già aperti
     if ((!isSwiped && diffX < 0) || (isSwiped && diffX < 140)) {
         const newX = isSwiped ? -140 + diffX : diffX;
-        // Limita il movimento per non superare i limiti
         if (newX < 5 && newX > -150) {
             itemRef.current.style.transform = `translateX(${newX}px)`;
         }
@@ -49,9 +46,7 @@ function PlayItem({ play, onEdit, onDelete }) {
     const deltaX = touchEndCoords.x - touchStartCoords.current.x;
     const deltaY = touchEndCoords.y - touchStartCoords.current.y;
 
-    // --- FIX SENSIBILITÀ: se il movimento è più verticale che orizzontale, è uno scroll ---
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
-        // Ripristina la posizione se non era uno swipe valido
         itemRef.current.style.transition = 'transform 0.3s ease';
         itemRef.current.style.transform = isSwiped ? 'translateX(-140px)' : 'translateX(0px)';
         return;
@@ -60,7 +55,6 @@ function PlayItem({ play, onEdit, onDelete }) {
     itemRef.current.style.transition = 'transform 0.3s ease';
     const swipeThreshold = 60;
 
-    // --- FIX SWIPE DESTRA: se si swippa a destra e la card è aperta, chiudila ---
     if (deltaX > swipeThreshold && isSwiped) {
         setIsSwiped(false);
         itemRef.current.style.transform = 'translateX(0px)';
@@ -68,15 +62,13 @@ function PlayItem({ play, onEdit, onDelete }) {
         setIsSwiped(true);
         itemRef.current.style.transform = 'translateX(-140px)';
     } else {
-        // Se non si supera la soglia, torna alla posizione di partenza
         itemRef.current.style.transform = isSwiped ? 'translateX(-140px)' : 'translateX(0px)';
     }
   };
   
-  // --- FIX CLICK: il click chiude il menu solo se non è stato un drag ---
   const handleCardClick = (e) => {
     const deltaX = Math.abs(e.clientX - touchStartCoords.current.x);
-    if (isSwiped && deltaX < 10) { // Considera click solo se il movimento è stato minimo
+    if (isSwiped && deltaX < 10) { 
       setIsSwiped(false);
       itemRef.current.style.transform = 'translateX(0px)';
     }
@@ -102,9 +94,7 @@ function PlayItem({ play, onEdit, onDelete }) {
           onTouchEnd={handleTouchEnd}
           onClick={handleCardClick}
         >
-            {/* Contenuto per la VISTA MOBILE A CARD */}
             <div className="mobile-card-content">
-                {/* ... contenuto invariato ... */}
                  <div className="play-item-main">
                     <span className="play-risultato">{risultato}</span>
                     <span className={`play-profitto ${profittoClass}`}>{profitto >= 0 ? '+' : ''}{profitto.toFixed(2)}€</span>
@@ -120,9 +110,7 @@ function PlayItem({ play, onEdit, onDelete }) {
                 </div>
             </div>
 
-            {/* Contenuto per la VISTA DESKTOP A TABELLA */}
             <div className="desktop-row-content">
-                {/* ... contenuto invariato ... */}
                 <div>{formattedDate}</div>
                 <div>{risultato}</div>
                 <div>x{quota.toFixed(2)}</div>
