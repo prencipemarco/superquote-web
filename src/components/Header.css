@@ -63,3 +63,25 @@
   color: #fff;
 }
 
+/* --- FIX PER IL MOBILE --- */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-title {
+    text-align: center; /* Centra il titolo */
+  }
+
+  .header-actions {
+    flex-direction: column; /* Impila i pulsanti verticalmente */
+    align-items: stretch; /* Fa sì che i pulsanti occupino tutta la larghezza */
+    width: 100%;
+  }
+
+  .header-button {
+    width: 100%; /* Forza la larghezza intera */
+    justify-content: center; /* Centra il testo e l'icona nel pulsante */
+  }
+}
