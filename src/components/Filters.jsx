@@ -1,20 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Filters.css';
 
-function Filters() {
-  // La logica di filtro verrà aggiunta qui
+// Aggiungiamo onFilterChange come prop per comunicare con App.jsx
+function Filters({ onFilterChange }) {
+  const [selectedCount, setSelectedCount] = useState('all');
+  const [selectedMonth, setSelectedMonth] = useState('all');
+
+  // Quando uno dei filtri cambia, chiamiamo la funzione passata come prop
+  useEffect(() => {
+    onFilterChange({
+      count: selectedCount,
+      month: selectedMonth
+    });
+  }, [selectedCount, selectedMonth, onFilterChange]);
+
+  const handleCountChange = (e) => {
+    setSelectedCount(e.target.value);
+  };
+
+  const handleMonthChange = (e) => {
+    setSelectedMonth(e.target.value);
+  };
+
+  // Funzione per generare le opzioni dei mesi
+  const getMonthOptions = () => {
+    const months = [];
+    const date = new Date();
+    for (let i = 0; i < 12; i++) {
+      const monthDate = new Date(date.getFullYear(), date.getMonth() - i, 1);
+      const monthValue = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+      const monthLabel = monthDate.toLocaleString('it-IT', { month: 'long', year: 'numeric' });
+      months.push({ value: monthValue, label: monthLabel });
+    }
+    return months;
+  };
+
   return (
     <div className="filters-container">
-      <h3>Filtra Giocate</h3>
-      <div className="filter-options">
-        <select name="time-filter">
+      <div className="filter-group">
+        <label htmlFor="plays-count">Mostra Giocate</label>
+        <select id="plays-count" value={selectedCount} onChange={handleCountChange}>
           <option value="all">Tutte</option>
           <option value="5">Ultime 5</option>
           <option value="10">Ultime 10</option>
           <option value="20">Ultime 20</option>
+          <option value="50">Ultime 50</option>
         </select>
-        <input type="month" name="month-filter" />
-        <button className="btn-secondary">Applica</button>
+      </div>
+      <div className="filter-group">
+        <label htmlFor="plays-month">Mese di Riferimento</label>
+        <select id="plays-month" value={selectedMonth} onChange={handleMonthChange}>
+          <option value="all">Tutti i mesi</option>
+          {getMonthOptions().map(month => (
+            <option key={month.value} value={month.value}>{month.label}</option>
+          ))}
+        </select>
       </div>
     </div>
   );
