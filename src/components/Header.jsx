@@ -5,8 +5,7 @@ function Header({ onImport, onExport }) {
   return (
     <header className="site-header">
       <div className="header-content">
-        <h1>Amici Stats Tracker 📊</h1>
-        <p>Monitora le tue giocate e analizza i risultati</p>
+        <h1>Bet365 Stats Tracker 📊</h1>
       </div>
       <div className="header-actions">
         <button onClick={onImport} className="btn-secondary">Importa CSV</button>
