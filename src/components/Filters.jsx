@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './Filters.css';
 
-// Aggiungiamo onFilterChange come prop per comunicare con App.jsx
 function Filters({ onFilterChange }) {
   const [selectedCount, setSelectedCount] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
 
-  // Quando uno dei filtri cambia, chiamiamo la funzione passata come prop
   useEffect(() => {
     onFilterChange({
       count: selectedCount,
@@ -22,7 +20,6 @@ function Filters({ onFilterChange }) {
     setSelectedMonth(e.target.value);
   };
 
-  // Funzione per generare le opzioni dei mesi
   const getMonthOptions = () => {
     const months = [];
     const date = new Date();
@@ -39,25 +36,32 @@ function Filters({ onFilterChange }) {
     <div className="filters-container">
       <div className="filter-group">
         <label htmlFor="plays-count">Mostra Giocate</label>
-        <select id="plays-count" value={selectedCount} onChange={handleCountChange}>
-          <option value="all">Tutte</option>
-          <option value="5">Ultime 5</option>
-          <option value="10">Ultime 10</option>
-          <option value="20">Ultime 20</option>
-          <option value="50">Ultime 50</option>
-        </select>
+        <div className="select-wrapper">
+          <select id="plays-count" value={selectedCount} onChange={handleCountChange}>
+            <option value="all">Tutte</option>
+            <option value="5">Ultime 5</option>
+            <option value="10">Ultime 10</option>
+            <option value="20">Ultime 20</option>
+            <option value="50">Ultime 50</option>
+          </select>
+          <span className="select-icon">▼</span>
+        </div>
       </div>
       <div className="filter-group">
         <label htmlFor="plays-month">Mese di Riferimento</label>
-        <select id="plays-month" value={selectedMonth} onChange={handleMonthChange}>
-          <option value="all">Tutti i mesi</option>
-          {getMonthOptions().map(month => (
-            <option key={month.value} value={month.value}>{month.label}</option>
-          ))}
-        </select>
+        <div className="select-wrapper">
+          <select id="plays-month" value={selectedMonth} onChange={handleMonthChange}>
+            <option value="all">Tutti i mesi</option>
+            {getMonthOptions().map(month => (
+              <option key={month.value} value={month.value}>{month.label}</option>
+            ))}
+          </select>
+          <span className="select-icon">▼</span>
+        </div>
       </div>
     </div>
   );
 }
 
 export default Filters;
+
