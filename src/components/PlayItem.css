@@ -1,108 +1,106 @@
 .play-item {
-  font-weight: 500;
-  transition: background-color 0.2s;
+  display: grid;
+  /* Corrisponde alla griglia dell'header in PlaysList.css */
+  grid-template-columns: 1fr 2fr 0.8fr 1fr 1fr 1fr 1fr 1fr; 
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
 }
+
+/* --- FIX HOVER --- */
 .play-item:hover {
-    background-color: #fafafa;
+  background-color: var(--input-bg-color); /* Colore scuro, non bianco */
 }
+
 .play-item:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
-/* Stili per i badge di stato */
-.status-badge {
-  padding: 0.3rem 0.8rem;
-  border-radius: 9999px;
+.play-item > div {
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+/* Stili per Profitto/Perdita */
+.profitto-positivo {
+  color: var(--win-color);
   font-weight: 600;
-  font-size: 0.8rem;
+}
+.profitto-negativo {
+  color: var(--loss-color);
+  font-weight: 600;
+}
+
+/* Stili per il badge dell'esito */
+.esito-cell {
   text-align: center;
+}
+.esito-badge {
   display: inline-block;
-  min-width: 80px;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
 }
+.esito-vinta { background-color: var(--win-color); }
+.esito-persa { background-color: var(--loss-color); }
+.esito-in-attesa { background-color: var(--pending-color); }
 
-.status-won {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-.status-lost {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-.status-pending {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-.status-refunded {
-  background-color: #ffedd5;
-  color: #9a3412;
-}
-
-
-/* Stili per i bottoni di azione */
+/* Stili per i pulsanti di azione */
 .play-actions {
   display: flex;
-  gap: 0.5rem;
-  justify-content: flex-start;
+  justify-content: center;
+  gap: 10px;
 }
-.action-btn {
+.action-button {
   background: none;
   border: none;
+  padding: 5px;
   cursor: pointer;
-  padding: 0.5rem;
-  font-weight: 600;
-  border-radius: 6px;
-  transition: background-color 0.2s;
-  font-size: 0.875rem;
+  color: var(--text-color-light);
+  transition: color 0.2s ease, transform 0.1s ease;
 }
-.edit-btn {
-  color: var(--primary-color);
+.action-button:hover {
+  transform: scale(1.1);
 }
-.edit-btn:hover {
-  background-color: #eff6ff;
+.action-button.edit:hover {
+  color: var(--secondary-color);
 }
-.delete-btn {
-  color: var(--danger-color);
-}
-.delete-btn:hover {
-  background-color: #fef2f2;
+.action-button.delete:hover {
+  color: var(--loss-color);
 }
 
 /* Stili per la visualizzazione mobile */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .play-item {
-    grid-template-columns: 1fr; /* Una colonna su mobile */
-    gap: 0.75rem;
-    padding: 1.5rem 1rem;
-    border-bottom: 1px solid var(--border-color);
+    grid-template-columns: 1fr 1fr; /* Due colonne su mobile */
+    gap: 10px 20px;
+    padding: 15px;
   }
-
-  .play-data-cell {
+  .play-item > div {
     display: flex;
-    justify-content: space-between;
-    padding: 0.25rem 0;
-    font-size: 1rem;
+    flex-direction: column;
   }
-  
-  .play-data-cell::before {
-    content: attr(data-label);
+  .play-item > div::before {
+    content: attr(data-label); /* Usa l'attributo data-label come etichetta */
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--text-light);
-    margin-right: 1rem;
+    color: var(--text-color-light);
+    margin-bottom: 4px;
+    text-transform: uppercase;
   }
-  
+  .esito-cell, .play-actions {
+    grid-column: 1 / -1; /* Occupa tutta la larghezza */
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
   .play-actions {
-      margin-top: 1rem;
-      justify-content: center;
-  }
-  .action-btn {
-      flex: 1;
-      text-align: center;
-      padding: 0.75rem;
-  }
-  .edit-btn {
-      background-color: #eff6ff;
-  }
-  .delete-btn {
-      background-color: #fef2f2;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
   }
 }
+

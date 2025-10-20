@@ -15,6 +15,7 @@ function PlaysList({ plays, onEdit, onDelete }) {
         <div>Quota</div>
         <div>Importo</div>
         <div>Vincita</div>
+        <div>Profitto</div> {/* <-- NUOVA COLONNA */}
         <div>Esito</div>
         <div>Azioni</div>
       </div>
@@ -33,3 +34,4 @@ function PlaysList({ plays, onEdit, onDelete }) {
 }
 
 export default PlaysList;
+
