@@ -1,43 +1,112 @@
+/* --- STRUTTURA PER LO SWIPE --- */
+.play-item-wrapper {
+  position: relative;
+  overflow: hidden; /* Nasconde i pulsanti che escono */
+  background-color: var(--card-bg-color);
+  margin-bottom: 10px;
+  border-radius: var(--border-radius-small);
+}
+
 .play-item {
-  display: grid;
-  /* Corrisponde alla griglia dell'header in PlaysList.css */
-  grid-template-columns: 1fr 2fr 0.8fr 1fr 1fr 1fr 1fr 1fr; 
+  background-color: var(--card-bg-color);
+  padding: 15px;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  border-left: 5px solid var(--border-color); /* Bordo di default */
+}
+
+.play-actions-swipe {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  z-index: 1;
+}
+
+.action-swipe-button {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 15px 20px;
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.2s ease;
+  justify-content: center;
+  width: 70px;
+  border: none;
+  color: white;
+  font-weight: bold;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+.action-swipe-button.edit { background-color: var(--secondary-color); color: #000; }
+.action-swipe-button.delete { background-color: var(--loss-color); }
+.action-swipe-button:hover {
+  filter: brightness(1.1);
+}
+.action-swipe-button svg {
+  margin-bottom: 5px;
 }
 
-/* --- FIX HOVER --- */
-.play-item:hover {
-  background-color: var(--input-bg-color); /* Colore scuro, non bianco */
+/* --- NUOVO LAYOUT CARD --- */
+.play-item-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
 }
-
-.play-item:last-child {
-  border-bottom: none;
-}
-
-.play-item > div {
-  font-size: 0.95rem;
+.play-risultato {
+  font-weight: 600;
+  font-size: 1.1rem;
   color: var(--text-color);
+  line-height: 1.3;
+  margin-right: 10px;
 }
+.play-profitto {
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.profitto-positivo { color: var(--win-color); }
+.profitto-negativo { color: var(--loss-color); }
 
-/* Stili per Profitto/Perdita */
-.profitto-positivo {
-  color: var(--win-color);
-  font-weight: 600;
-}
-.profitto-negativo {
-  color: var(--loss-color);
-  font-weight: 600;
-}
-
-/* Stili per il badge dell'esito */
-.esito-cell {
+.play-item-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
   text-align: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 10px;
 }
+.play-item-details div {
+  display: flex;
+  flex-direction: column;
+}
+.play-item-details span {
+  font-size: 0.8rem;
+  color: var(--text-color-light);
+  margin-bottom: 4px;
+}
+.play-item-details strong {
+  font-size: 1rem;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.play-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.play-date {
+  font-size: 0.8rem;
+  color: var(--text-color-light);
+}
+
+/* Badge Esito */
 .esito-badge {
-  display: inline-block;
   padding: 5px 12px;
   border-radius: 15px;
   font-size: 0.8rem;
@@ -49,58 +118,33 @@
 .esito-persa { background-color: var(--loss-color); }
 .esito-in-attesa { background-color: var(--pending-color); }
 
-/* Stili per i pulsanti di azione */
-.play-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-.action-button {
-  background: none;
-  border: none;
-  padding: 5px;
-  cursor: pointer;
-  color: var(--text-color-light);
-  transition: color 0.2s ease, transform 0.1s ease;
-}
-.action-button:hover {
-  transform: scale(1.1);
-}
-.action-button.edit:hover {
-  color: var(--secondary-color);
-}
-.action-button.delete:hover {
-  color: var(--loss-color);
-}
-
-/* Stili per la visualizzazione mobile */
-@media (max-width: 900px) {
+/* --- VISUALIZZAZIONE DESKTOP (Ripristina la vista a tabella) --- */
+@media (min-width: 901px) {
+  .play-item-wrapper {
+    margin: 0;
+    border-radius: 0;
+  }
   .play-item {
-    grid-template-columns: 1fr 1fr; /* Due colonne su mobile */
-    gap: 10px 20px;
-    padding: 15px;
-  }
-  .play-item > div {
-    display: flex;
-    flex-direction: column;
-  }
-  .play-item > div::before {
-    content: attr(data-label); /* Usa l'attributo data-label come etichetta */
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-color-light);
-    margin-bottom: 4px;
-    text-transform: uppercase;
-  }
-  .esito-cell, .play-actions {
-    grid-column: 1 / -1; /* Occupa tutta la larghezza */
-    flex-direction: row;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr 2fr 0.8fr 1fr 1fr 1fr 1fr 1fr;
     align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    border-left: none; /* Rimuove il bordo colorato su desktop */
+    margin-bottom: 0;
   }
+  .play-item:hover {
+    background-color: var(--input-bg-color);
+  }
+  /* Nasconde la struttura a card e mostra i dati in linea */
+  .play-item-main, .play-item-details, .play-item-footer, .play-actions-swipe {
+    display: contents; /* Fa comportare gli elementi come se non avessero un wrapper */
+  }
+  /* Mostra i pulsanti di azione standard su desktop */
   .play-actions {
-    padding-top: 10px;
-    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    gap: 10px;
   }
 }
 
