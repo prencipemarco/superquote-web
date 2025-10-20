@@ -51,31 +51,15 @@
   transform: translateY(0);
 }
 
-/* Stile specifico per il link a Bet365 */
-.header-button.bet-link {
-  background-color: var(--primary-color); /* Verde */
-  color: #fff;
-}
-
-.header-button.bet-link:hover {
-  background-color: #289a49; /* Verde più chiaro */
-}
+/* Stili specifici */
+.header-button.bet-link { background-color: var(--primary-color); color: #fff; }
+.header-button.bet-link:hover { background-color: #289a49; }
+.header-button.google-sheets-link { background-color: #1A73E8; color: #fff; }
+.header-button.google-sheets-link:hover { background-color: #2b80f8; }
+.header-button.archive-button { background-color: var(--loss-color); color: #fff; }
+.header-button.archive-button:hover { background-color: #d32f2f; }
 
 .header-button svg {
-  color: var(--secondary-color);
-}
-.bet-link svg {
   color: #fff;
-}
-
-
-@media (max-width: 768px) {
-  .app-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .header-actions {
-    justify-content: center;
-  }
 }
 
