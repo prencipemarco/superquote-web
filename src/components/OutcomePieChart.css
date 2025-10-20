@@ -1,0 +1,32 @@
+.chart-card {
+  background-color: var(--card-bg-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-small);
+  padding: 20px;
+  flex-grow: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-card h3 {
+  color: var(--text-color);
+  font-size: 1.2rem;
+  margin-top: 0;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.chart-card.empty {
+  justify-content: center;
+  align-items: center;
+  min-height: 250px;
+  color: var(--text-color-light);
+  font-style: italic;
+}
+
+.recharts-pie-label-text {
+  fill: #fff;
+  font-weight: bold;
+  font-size: 0.9rem;
+}

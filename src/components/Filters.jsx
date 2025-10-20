@@ -4,20 +4,20 @@ import './Filters.css';
 function Filters({ onFilterChange }) {
   const [selectedCount, setSelectedCount] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
+  const [selectedEsito, setSelectedEsito] = useState('all');
 
   useEffect(() => {
     onFilterChange({
       count: selectedCount,
-      month: selectedMonth
+      month: selectedMonth,
+      esito: selectedEsito,
     });
-  }, [selectedCount, selectedMonth, onFilterChange]);
+  }, [selectedCount, selectedMonth, selectedEsito, onFilterChange]);
 
-  const handleCountChange = (e) => {
-    setSelectedCount(e.target.value);
-  };
-
-  const handleMonthChange = (e) => {
-    setSelectedMonth(e.target.value);
+  const handleReset = () => {
+    setSelectedCount('all');
+    setSelectedMonth('all');
+    setSelectedEsito('all');
   };
 
   const getMonthOptions = () => {
@@ -37,7 +37,7 @@ function Filters({ onFilterChange }) {
       <div className="filter-group">
         <label htmlFor="plays-count">Mostra Giocate</label>
         <div className="select-wrapper">
-          <select id="plays-count" value={selectedCount} onChange={handleCountChange}>
+          <select id="plays-count" value={selectedCount} onChange={(e) => setSelectedCount(e.target.value)}>
             <option value="all">Tutte</option>
             <option value="5">Ultime 5</option>
             <option value="10">Ultime 10</option>
@@ -48,9 +48,9 @@ function Filters({ onFilterChange }) {
         </div>
       </div>
       <div className="filter-group">
-        <label htmlFor="plays-month">Mese di Riferimento</label>
+        <label htmlFor="plays-month">Mese</label>
         <div className="select-wrapper">
-          <select id="plays-month" value={selectedMonth} onChange={handleMonthChange}>
+          <select id="plays-month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
             <option value="all">Tutti i mesi</option>
             {getMonthOptions().map(month => (
               <option key={month.value} value={month.value}>{month.label}</option>
@@ -58,6 +58,21 @@ function Filters({ onFilterChange }) {
           </select>
           <span className="select-icon">▼</span>
         </div>
+      </div>
+      <div className="filter-group">
+        <label htmlFor="plays-esito">Esito</label>
+        <div className="select-wrapper">
+          <select id="plays-esito" value={selectedEsito} onChange={(e) => setSelectedEsito(e.target.value)}>
+            <option value="all">Tutti gli esiti</option>
+            <option value="Vinta">Vinte</option>
+            <option value="Persa">Perse</option>
+            <option value="In attesa">In attesa</option>
+          </select>
+          <span className="select-icon">▼</span>
+        </div>
+      </div>
+      <div className="filter-actions">
+        <button onClick={handleReset} className="reset-button">Azzera Filtri</button>
       </div>
     </div>
   );
