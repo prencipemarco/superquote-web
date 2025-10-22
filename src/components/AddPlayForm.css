@@ -99,36 +99,7 @@
   color: var(--text-color);
 }
 
-/* --- STILI PREVISIONE AGGIORNATI --- */
-.prediction-box {
-  margin-top: 20px;
-  padding: 12px 15px;
-  background-color: var(--input-bg-color);
-  border-left: 4px solid var(--secondary-color);
-  border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
-  color: var(--text-color);
-  font-style: italic;
-  animation: fadeIn 0.5s ease;
-}
-
-.prediction-box p {
-  margin: 0;
-  padding: 4px 0;
-  font-size: 0.95rem;
-}
-.prediction-box p:first-child {
-  padding-top: 0;
-}
-.prediction-box p:last-child {
-  padding-bottom: 0;
-}
-
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+/* Stili di previsione rimossi */
 
 @media (max-width: 600px) {
   .add-play-form {

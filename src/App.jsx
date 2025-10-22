@@ -15,7 +15,7 @@ function App() {
   const [totalPlaysCount, setTotalPlaysCount] = useState(0); 
   const [editingPlay, setEditingPlay] = useState(null);
   const [filters, setFilters] = useState({ count: 'all', month: 'all', esito: 'all' });
-  const [prediction, setPrediction] = useState([]); // <-- Modificato in array
+  // Rimossa la logica 'prediction'
   
   const [lineChartData, setLineChartData] = useState([]);
   const [trendColor, setTrendColor] = useState('#888');
@@ -23,7 +23,7 @@ function App() {
   const [barChartData, setBarChartData] = useState([]);
   
   const formSectionRef = useRef(null);
-  const debounceTimeout = useRef(null); 
+  // Rimosso 'debounceTimeout'
 
   // --- Funzioni Core (invariate) ---
   const processDataForCharts = useCallback((currentPlays) => {
@@ -108,66 +108,7 @@ function App() {
     getTotalPlaysCount();
   }, [getPlays, getTotalPlaysCount]);
 
-  // --- FUNZIONE DI ANALISI MIGLIORATA ---
-  const runAnalysis = useCallback(async (formData) => {
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
-    
-    debounceTimeout.current = setTimeout(async () => {
-      const { quota, risultato } = formData;
-      let results = [];
-
-      // 1. Analisi Quota
-      if (quota && quota >= 1) {
-        const quotaRange = 0.2;
-        // --- ERRORE CORRETTO QUI ---
-        const { data: data_quota, error: error_quota } = await supabase
-          .from('plays')
-          .select('esito')
-          .neq('esito', 'In attesa')
-          .gte('quota', quota - quotaRange)
-          .lte('quota', quota + quotaRange);
-        
-        if (error_quota) console.error('Errore analisi quota:', error_quota);
-        
-        if (data_quota && data_quota.length > 0) {
-          const total = data_quota.length;
-          const wins = data_quota.filter(p => p.esito === 'Vinta').length;
-          const winRate = (wins / total) * 100;
-          results.push(`Quota (~${quota.toFixed(2)}): ${wins}V / ${total - wins}P (${winRate.toFixed(1)}%)`);
-        } else {
-          results.push(`Quota (~${quota.toFixed(2)}): Nessuno storico.`);
-        }
-      }
-
-      // 2. Analisi Contesto (prima parola del risultato)
-      const keywords = risultato.split(' ').filter(k => k.length > 3);
-      if (keywords.length > 0) {
-        const keyword = keywords[0]; // Analizza la prima parola significativa (es. "Barcellona")
-        const { data: data_keyword, error: error_keyword } = await supabase
-          .from('plays')
-          .select('esito')
-          .neq('esito', 'In attesa')
-          .ilike('risultato', `%${keyword}%`); // Cerca la parola nel risultato
-
-        if (error_keyword) console.error('Errore analisi contesto:', error_keyword);
-
-        if (data_keyword && data_keyword.length > 0) {
-          const total = data_keyword.length;
-          const wins = data_keyword.filter(p => p.esito === 'Vinta').length;
-          const winRate = (wins / total) * 100;
-          results.push(`Contesto ("${keyword}"): ${wins}V / ${total - wins}P (${winRate.toFixed(1)}%)`);
-        } else {
-           results.push(`Contesto ("${keyword}"): Nessuno storico.`);
-        }
-      }
-      
-      setPrediction(results);
-
-    }, 500); // Aspetta 500ms
-
-  }, []);
+  // --- Funzione di analisi rimossa ---
 
   const handleArchiveAndClear = async () => { 
     const confirmation = window.confirm(
@@ -229,7 +170,6 @@ function App() {
     if (!error) {
       getPlays(); 
       getTotalPlaysCount(); 
-      setPrediction([]);
     }
   };
 
@@ -238,7 +178,6 @@ function App() {
     if (!error) { 
       setEditingPlay(null); 
       getPlays(); 
-      setPrediction([]);
     } 
   };
 
@@ -273,6 +212,7 @@ function App() {
           }
 
           const playsToInsert = lines.slice(1).map(line => {
+            // regex semplificata per CSV, potrebbe non gestire casi complessi con virgole nei risultati
             const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g).map(v => v.replace(/"/g, ''));
             const play = {
               data: values[1],
@@ -312,12 +252,10 @@ function App() {
   const handleEditClick = (play) => { 
     setEditingPlay(play); 
     formSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
-    setPrediction([]); 
   };
 
   const handleCancelEdit = () => {
     setEditingPlay(null);
-    setPrediction([]);
   };
 
   return (
@@ -344,9 +282,8 @@ function App() {
                 onAddPlay={handleAddPlay}
                 onUpdatePlay={handleUpdatePlay}
                 editingPlay={editingPlay}
-                onCancelEdit={handleCancelEdit} 
-                onAnalysis={runAnalysis} // Prop rinominato
-                predictionResult={prediction} // Passa l'array di previsioni
+                // Props di predizione rimossi
+                setEditingPlay={setEditingPlay} // Passiamo setEditingPlay per il pulsante 'Annulla'
             />
         </section>
 

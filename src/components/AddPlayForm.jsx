@@ -5,9 +5,7 @@ const AddPlayForm = ({
   onAddPlay, 
   onUpdatePlay, 
   editingPlay, 
-  onCancelEdit,
-  onAnalysis, // Prop rinominato
-  predictionResult 
+  setEditingPlay // Modificato per usare setEditingPlay
 }) => {
   const initialState = {
     data: new Date().toISOString().split('T')[0],
@@ -28,7 +26,6 @@ const AddPlayForm = ({
     } else {
       setFormData(initialState);
     }
-    onAnalysis(initialState); // Pulisce la previsione al cambio
   }, [editingPlay]);
 
   const handleChange = (e) => {
@@ -50,9 +47,6 @@ const AddPlayForm = ({
     }
 
     setFormData(newFormData);
-
-    // --- ATTIVA L'ANALISI COMPLETA ---
-    onAnalysis(newFormData);
   };
 
   const handleSubmit = (e) => {
@@ -79,7 +73,7 @@ const AddPlayForm = ({
 
   const handleCancel = () => {
     setFormData(initialState);
-    onCancelEdit();
+    setEditingPlay(null); // Usa setEditingPlay per annullare
   };
 
   return (
@@ -87,7 +81,7 @@ const AddPlayForm = ({
       <h3>{editingPlay ? 'Modifica Giocata' : 'Aggiungi Nuova Giocata'}</h3>
       <form onSubmit={handleSubmit} className="add-play-form">
         <div className="form-group span-2">
-          <label htmlFor="risultato">Risultato (es. Barcellona MG 1-3)</label>
+          <label htmlFor="risultato">Risultato</label>
           <input type="text" id="risultato" name="risultato" value={formData.risultato} onChange={handleChange} required />
         </div>
         <div className="form-group">
@@ -123,14 +117,7 @@ const AddPlayForm = ({
         </div>
       </form>
       
-      {/* --- BOX DI PREVISIONE (ORA MOSTRA PIÙ RIGHE) --- */}
-      {predictionResult && predictionResult.length > 0 && (
-        <div className="prediction-box">
-          {predictionResult.map((line, index) => (
-            <p key={index}>{line}</p>
-          ))}
-        </div>
-      )}
+      {/* Box di previsione rimosso */}
     </div>
   );
 };
