@@ -1,102 +1,139 @@
 import React, { useState, useEffect } from 'react';
 import './AddPlayForm.css';
 
-function AddPlayForm({ onAddPlay, onUpdatePlay, editingPlay, setEditingPlay }) {
-    const initialState = {
-        data: new Date().toISOString().split('T')[0],
-        risultato: '',
-        quota: '',
-        importo: '',
-        esito: 'In attesa',
-    };
+const AddPlayForm = ({ 
+  onAddPlay, 
+  onUpdatePlay, 
+  editingPlay, 
+  onCancelEdit,
+  onAnalysis, // Prop rinominato
+  predictionResult 
+}) => {
+  const initialState = {
+    data: new Date().toISOString().split('T')[0],
+    risultato: '',
+    quota: '',
+    importo: '',
+    vincita: 0,
+    esito: 'In attesa'
+  };
+  const [formData, setFormData] = useState(initialState);
 
-    const [play, setPlay] = useState(initialState);
-    const isEditing = editingPlay !== null;
+  useEffect(() => {
+    if (editingPlay) {
+      setFormData({
+        ...editingPlay,
+        data: new Date(editingPlay.data).toISOString().split('T')[0]
+      });
+    } else {
+      setFormData(initialState);
+    }
+    onAnalysis(initialState); // Pulisce la previsione al cambio
+  }, [editingPlay]);
 
-    useEffect(() => {
-        if (isEditing) {
-            setPlay({
-                ...editingPlay,
-                // Assicurati che il formato della data sia yyyy-mm-dd
-                data: new Date(editingPlay.data).toISOString().split('T')[0]
-            });
-        } else {
-            setPlay(initialState);
-        }
-    }, [editingPlay]);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    let newFormData = { ...formData, [name]: value };
 
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setPlay({ ...play, [name]: value });
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        // Calcolo vincita potenziale
-        const vincitaPotenziale = parseFloat(play.quota) * parseFloat(play.importo);
-        const finalPlay = { 
-            ...play,
-            quota: parseFloat(play.quota),
-            importo: parseFloat(play.importo),
-            // La vincita è 0 se persa o in attesa, altrimenti è il calcolo
-            vincita: play.esito === 'Vinta' ? vincitaPotenziale : 0
-        };
-
-        if (isEditing) {
-            onUpdatePlay(finalPlay);
-        } else {
-            onAddPlay(finalPlay);
-        }
-        setPlay(initialState); // Resetta il form
-    };
-
-    const handleCancel = () => {
-        setEditingPlay(null);
-        setPlay(initialState);
+    // Calcolo automatico vincita
+    if (name === 'quota' || name === 'importo') {
+      const quota = parseFloat(name === 'quota' ? value : formData.quota) || 0;
+      const importo = parseFloat(name === 'importo' ? value : formData.importo) || 0;
+      newFormData.vincita = (quota > 0 && importo > 0) ? (quota * importo) : 0;
+    }
+    
+    // Aggiorna vincita se cambia esito
+    if (name === 'esito') {
+        const quota = parseFloat(newFormData.quota) || 0;
+        const importo = parseFloat(newFormData.importo) || 0;
+        newFormData.vincita = (value === 'Vinta' && quota > 0 && importo > 0) ? (quota * importo) : 0;
     }
 
-    return (
-        <div className="add-play-form-container">
-            <h2>{isEditing ? 'Modifica Giocata' : 'Aggiungi Nuova Giocata'}</h2>
-            <form onSubmit={handleSubmit} className="add-play-form">
-                <div className="form-grid">
-                    <div className="form-group">
-                        <label htmlFor="data">Data</label>
-                        <input type="date" id="data" name="data" value={play.data} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="risultato">Risultato</label>
-                        <input type="text" id="risultato" name="risultato" placeholder="Es. Inter - Milan 1" value={play.risultato} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="quota">Quota</label>
-                        <input type="number" step="0.01" min="1" id="quota" name="quota" placeholder="Es. 2.50" value={play.quota} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="importo">Importo (€)</label>
-                        <input type="number" step="0.01" min="0" id="importo" name="importo" placeholder="Es. 10" value={play.importo} onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="esito">Esito</label>
-                        <select id="esito" name="esito" value={play.esito} onChange={handleChange}>
-                            <option value="In attesa">In attesa</option>
-                            <option value="Vinta">Vinta</option>
-                            <option value="Persa">Persa</option>
-                            <option value="Rimborsata">Rimborsata</option>
-                        </select>
-                    </div>
-                </div>
-                <div className="form-actions">
-                    <button type="submit" className="btn-primary">{isEditing ? 'Salva Modifiche' : 'Aggiungi Giocata'}</button>
-                    {isEditing && (
-                        <button type="button" className="btn-secondary" onClick={handleCancel}>Annulla</button>
-                    )}
-                </div>
-            </form>
+    setFormData(newFormData);
+
+    // --- ATTIVA L'ANALISI COMPLETA ---
+    onAnalysis(newFormData);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.risultato || formData.quota <= 0 || formData.importo <= 0) {
+      alert("Per favore, compila Risultato, Quota e Importo.");
+      return;
+    }
+    
+    const playData = {
+      ...formData,
+      quota: parseFloat(formData.quota),
+      importo: parseFloat(formData.importo),
+      vincita: parseFloat(formData.vincita),
+    };
+
+    if (editingPlay) {
+      onUpdatePlay(playData);
+    } else {
+      onAddPlay(playData);
+    }
+    setFormData(initialState);
+  };
+
+  const handleCancel = () => {
+    setFormData(initialState);
+    onCancelEdit();
+  };
+
+  return (
+    <div className="add-play-form-container">
+      <h3>{editingPlay ? 'Modifica Giocata' : 'Aggiungi Nuova Giocata'}</h3>
+      <form onSubmit={handleSubmit} className="add-play-form">
+        <div className="form-group span-2">
+          <label htmlFor="risultato">Risultato (es. Barcellona MG 1-3)</label>
+          <input type="text" id="risultato" name="risultato" value={formData.risultato} onChange={handleChange} required />
         </div>
-    );
-}
+        <div className="form-group">
+          <label htmlFor="data">Data</label>
+          <input type="date" id="data" name="data" value={formData.data} onChange={handleChange} required />
+        </div>
+        <div className="form-group">
+          <label htmlFor="quota">Quota</label>
+          <input type="number" step="0.01" min="1" id="quota" name="quota" value={formData.quota} onChange={handleChange} required />
+        </div>
+        <div className="form-group">
+          <label htmlFor="importo">Importo (€)</label>
+          <input type="number" step="0.01" min="0" id="importo" name="importo" value={formData.importo} onChange={handleChange} required />
+        </div>
+         <div className="form-group">
+          <label htmlFor="esito">Esito</label>
+          <select id="esito" name="esito" value={formData.esito} onChange={handleChange}>
+            <option value="In attesa">In attesa</option>
+            <option value="Vinta">Vinta</option>
+            <option value="Persa">Persa</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="vincita">Vincita Potenziale (€)</label>
+          <input type="number" id="vincita" name="vincita" value={formData.vincita.toFixed(2)} readOnly />
+        </div>
+       
+        <div className="form-actions span-2">
+          <button type="submit" className="button-primary">{editingPlay ? 'Salva Modifiche' : 'Aggiungi Giocata'}</button>
+          {editingPlay && (
+            <button type="button" onClick={handleCancel} className="button-secondary">Annulla</button>
+          )}
+        </div>
+      </form>
+      
+      {/* --- BOX DI PREVISIONE (ORA MOSTRA PIÙ RIGHE) --- */}
+      {predictionResult && predictionResult.length > 0 && (
+        <div className="prediction-box">
+          {predictionResult.map((line, index) => (
+            <p key={index}>{line}</p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default AddPlayForm;
+
