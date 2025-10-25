@@ -12,6 +12,7 @@ import './index.css';
 
 function App() {
   const [plays, setPlays] = useState([]);
+  const [totalPlaysCount, setTotalPlaysCount] = useState(0); 
   const [editingPlay, setEditingPlay] = useState(null);
   const [filters, setFilters] = useState({ count: 'all', month: 'all', esito: 'all' });
   
@@ -22,6 +23,7 @@ function App() {
   
   const formSectionRef = useRef(null);
 
+  // --- Funzione Core Aggiornata ---
   const processDataForCharts = useCallback((currentPlays) => {
     if (currentPlays.length === 0) {
       setLineChartData([]);
@@ -29,6 +31,8 @@ function App() {
       setBarChartData([]);
       return;
     }
+    
+    // 1. Calcola il saldo cumulativo
     const sortedPlays = [...currentPlays].sort((a, b) => new Date(a.data) - new Date(b.data));
     let cumulativeBalance = 0;
     const balanceData = sortedPlays.map(play => {
@@ -36,24 +40,52 @@ function App() {
       return { data: play.data, saldo: cumulativeBalance };
     });
     
-    const regressionPoints = balanceData.map((d, index) => ({ x: index, y: d.saldo }));
-    const n = regressionPoints.length;
-    let slope = 0, intercept = 0;
-    if (n >= 2) {
-      let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
-      regressionPoints.forEach(p => { sumX += p.x; sumY += p.y; sumXY += p.x * p.y; sumXX += p.x * p.x; });
-      slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-      intercept = (sumY - slope * sumX) / n;
+    // 2. --- NUOVA LOGICA: MEDIA MOBILE (Moving Average) ---
+    // Questo crea una linea di trend più reattiva
+    const smaPeriod = 5; // Periodo della media mobile (ultime 5 giocate)
+    const smaData = [];
+
+    for (let i = 0; i < balanceData.length; i++) {
+        if (i < smaPeriod - 1) {
+            // Non ci sono abbastanza dati per la media, metti null
+            smaData.push(null);
+        } else {
+            // Calcola la media degli ultimi 'smaPeriod' punti di saldo
+            let sum = 0;
+            for (let j = 0; j < smaPeriod; j++) {
+                sum += balanceData[i - j].saldo;
+            }
+            smaData.push(sum / smaPeriod);
+        }
     }
+
+    // 3. Imposta il colore del trend in base alla direzione della media mobile
+    let currentTrendColor = 'var(--text-color-light)'; // Grigio di default
+    if (smaData.length >= 2) {
+        // Prende gli ultimi due punti validi della media mobile
+        const validSmaPoints = smaData.filter(p => p !== null);
+        if (validSmaPoints.length >= 2) {
+          const lastSma = validSmaPoints[validSmaPoints.length - 1];
+          const secondLastSma = validSmaPoints[validSmaPoints.length - 2];
+          
+          if (lastSma > secondLastSma) {
+              currentTrendColor = 'var(--win-color)'; // Trend positivo
+          } else if (lastSma < secondLastSma) {
+              currentTrendColor = 'var(--loss-color)'; // Trend negativo
+          }
+        }
+    }
+    setTrendColor(currentTrendColor);
     
-    setTrendColor(slope >= 0 ? 'var(--win-color)' : 'var(--loss-color)');
-    
+    // 4. Combina i dati per il grafico
     const combinedData = balanceData.map((d, index) => ({
       ...d,
-      trend: slope * index + intercept,
+      trend: smaData[index], // 'trend' ora è la Media Mobile
     }));
+    
     setLineChartData(combinedData);
 
+    // --- Grafici a torta e barre (invariati) ---
     const outcomes = currentPlays.reduce((acc, play) => {
       acc[play.esito] = (acc[play.esito] || 0) + 1;
       return acc;
@@ -77,7 +109,14 @@ function App() {
     const barData = Object.values(monthlyData).sort((a,b) => a.date - b.date).map(({name, importo, vincita}) => ({name, importo, vincita}));
     setBarChartData(barData);
   }, []);
-
+  
+  // --- Il resto delle funzioni (getPlays, handleAddPlay, ecc.) è invariato ---
+  const getTotalPlaysCount = useCallback(async () => {
+    const { count, error } = await supabase
+      .from('plays')
+      .select('*', { count: 'exact', head: true });
+    if (!error) setTotalPlaysCount(count || 0);
+  }, []);
   const getPlays = useCallback(async () => {
     let query = supabase.from('plays').select('*');
     if (filters.esito !== 'all') { query = query.eq('esito', filters.esito); }
@@ -94,10 +133,93 @@ function App() {
     else { setPlays(data); processDataForCharts(data); }
   }, [filters, processDataForCharts]);
 
-  useEffect(() => { getPlays(); }, [getPlays]);
+  useEffect(() => {
+    getPlays();
+    getTotalPlaysCount();
+  }, [getPlays, getTotalPlaysCount]);
 
-  // --- FUNZIONE DI IMPORTAZIONE CORRETTA ---
-  const handleImportPlays = () => {
+  const handleArchiveAndClear = async () => { 
+    const confirmation = window.confirm(
+      "ATTENZIONE: Stai per scaricare TUTTE le giocate e cancellarle PERMANENTEMENTE dal database.\n\nQuesta azione non può essere annullata.\n\nSei assolutamente sicuro di voler procedere?"
+    );
+
+    if (!confirmation) {
+      alert("Azione annullata.");
+      return;
+    }
+
+    const { data: allPlays, error: fetchError } = await supabase
+      .from('plays')
+      .select('*')
+      .order('data', { ascending: true });
+
+    if (fetchError || !allPlays) {
+      alert("Errore nel caricamento dei dati per l'archivio. Riprova.");
+      return;
+    }
+
+    if (allPlays.length === 0) {
+      alert("Nessuna giocata da archiviare.");
+      return;
+    }
+
+    const headers = ["ID", "Data", "Risultato", "Quota", "Importo", "Vincita", "Esito"];
+    const csvContent = [
+      headers.join(','),
+      ...allPlays.map(p => `${p.id},${p.data},"${p.risultato}",${p.quota},${p.importo},${p.vincita},${p.esito}`)
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    const date = new Date().toISOString().split('T')[0];
+    link.setAttribute("download", `archivio_giocate_${date}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    
+    const { error: deleteError } = await supabase
+        .from('plays')
+        .delete()
+        .neq('id', -1); 
+
+    if (deleteError) {
+        alert("Errore durante la pulizia del database. I dati sono stati scaricati ma non eliminati. Contatta il supporto.");
+    } else {
+        alert("Archiviazione completata con successo! Il database è stato svuotato.");
+        getPlays();
+        getTotalPlaysCount();
+    }
+  };
+  
+  const handleAddPlay = async (play) => { 
+    const { error } = await supabase.from('plays').insert([play]); 
+    if (!error) {
+      getPlays(); 
+      getTotalPlaysCount(); 
+    }
+  };
+
+  const handleUpdatePlay = async (play) => { 
+    const { error } = await supabase.from('plays').update(play).eq('id', play.id); 
+    if (!error) { 
+      setEditingPlay(null); 
+      getPlays(); 
+    } 
+  };
+
+  const handleDeletePlay = async (id) => { 
+    if (window.confirm("Sei sicuro?")) { 
+      const { error } = await supabase.from('plays').delete().eq('id', id); 
+      if (!error) {
+        getPlays(); 
+        getTotalPlaysCount();
+      }
+    }
+  };
+
+  const handleImportPlays = () => { 
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.csv';
@@ -127,7 +249,6 @@ function App() {
               vincita: parseFloat(values[5]),
               esito: values[6],
             };
-            // Validazione base
             if (!play.data || isNaN(play.quota) || isNaN(play.importo)) {
               throw new Error(`Riga non valida: ${line}`);
             }
@@ -142,6 +263,7 @@ function App() {
           } else {
             alert(`${playsToInsert.length} giocate importate con successo!`);
             getPlays();
+            getTotalPlaysCount();
           }
         } catch (err) {
           console.error("Errore Parsing:", err);
@@ -152,16 +274,16 @@ function App() {
     };
     input.click();
   };
-
-  const handleArchiveAndClear = async () => {
-    // ... logica archiviazione invariata ...
-  };
-  
   const handleFilterChange = useCallback((newFilters) => { setFilters(prev => ({...prev, ...newFilters})); }, []);
-  const handleAddPlay = async (play) => { const { error } = await supabase.from('plays').insert([play]); if (!error) getPlays(); };
-  const handleUpdatePlay = async (play) => { const { error } = await supabase.from('plays').update(play).eq('id', play.id); if (!error) { setEditingPlay(null); getPlays(); } };
-  const handleDeletePlay = async (id) => { if (window.confirm("Sei sicuro?")) { const { error } = await supabase.from('plays').delete().eq('id', id); if (!error) getPlays(); }};
-  const handleEditClick = (play) => { setEditingPlay(play); formSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  
+  const handleEditClick = (play) => { 
+    setEditingPlay(play); 
+    formSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPlay(null);
+  };
 
   return (
     <div className="app-container">
@@ -171,7 +293,10 @@ function App() {
       />
       <main>
         <section className="dashboard-section">
-          <StatsDashboard plays={plays} />
+          <StatsDashboard 
+            plays={plays}
+            totalPlaysCount={totalPlaysCount}
+          />
           <PlaysChart data={lineChartData} trendColor={trendColor} />
           <div className="charts-grid">
             <OutcomePieChart data={pieChartData} />
@@ -184,7 +309,7 @@ function App() {
                 onAddPlay={handleAddPlay}
                 onUpdatePlay={handleUpdatePlay}
                 editingPlay={editingPlay}
-                setEditingPlay={setEditingPlay}
+                setEditingPlay={setEditingPlay} 
             />
         </section>
 
