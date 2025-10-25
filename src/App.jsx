@@ -40,37 +40,50 @@ function App() {
       return { data: play.data, saldo: cumulativeBalance };
     });
     
-    // 2. --- NUOVA LOGICA: MEDIA MOBILE (Moving Average) ---
-    // Questo crea una linea di trend più reattiva
-    const smaPeriod = 5; // Periodo della media mobile (ultime 5 giocate)
-    const smaData = [];
+    // 2. --- NUOVA LOGICA: MEDIA MOBILE ESPONENZIALE (EMA) ---
+    // Dà più peso ai dati recenti, rendendo il trend più reattivo.
+    const emaPeriod = 5; // Periodo per il calcolo del moltiplicatore
+    const smoothing = 2; // Fattore di smorzamento standard
+    const multiplier = smoothing / (1 + emaPeriod);
+    
+    const emaData = [];
+    let previousEma = null;
 
     for (let i = 0; i < balanceData.length; i++) {
-        if (i < smaPeriod - 1) {
-            // Non ci sono abbastanza dati per la media, metti null
-            smaData.push(null);
-        } else {
-            // Calcola la media degli ultimi 'smaPeriod' punti di saldo
-            let sum = 0;
-            for (let j = 0; j < smaPeriod; j++) {
-                sum += balanceData[i - j].saldo;
+        if (i < emaPeriod - 1 || previousEma === null) {
+            // Inizia la EMA con una semplice media mobile (SMA) per il primo valore
+            if (i === emaPeriod - 1) {
+                let sum = 0;
+                for (let j = 0; j < emaPeriod; j++) {
+                    sum += balanceData[i - j].saldo;
+                }
+                previousEma = sum / emaPeriod;
+                emaData.push(previousEma);
+            } else {
+                emaData.push(null); // Non ci sono ancora abbastanza dati
             }
-            smaData.push(sum / smaPeriod);
+        } else {
+            // Calcola la EMA
+            // EMA = (ValoreCorrente * moltiplicatore) + (EMAPrecedente * (1 - moltiplicatore))
+            const currentEma = (balanceData[i].saldo * multiplier) + (previousEma * (1 - multiplier));
+            emaData.push(currentEma);
+            previousEma = currentEma; // Aggiorna la EMA precedente per il prossimo ciclo
         }
     }
 
-    // 3. Imposta il colore del trend in base alla direzione della media mobile
+
+    // 3. Imposta il colore del trend in base alla direzione della EMA
     let currentTrendColor = 'var(--text-color-light)'; // Grigio di default
-    if (smaData.length >= 2) {
+    if (emaData.length >= 2) {
         // Prende gli ultimi due punti validi della media mobile
-        const validSmaPoints = smaData.filter(p => p !== null);
-        if (validSmaPoints.length >= 2) {
-          const lastSma = validSmaPoints[validSmaPoints.length - 1];
-          const secondLastSma = validSmaPoints[validSmaPoints.length - 2];
+        const validEmaPoints = emaData.filter(p => p !== null);
+        if (validEmaPoints.length >= 2) {
+          const lastEma = validEmaPoints[validEmaPoints.length - 1];
+          const secondLastEma = validEmaPoints[validEmaPoints.length - 2];
           
-          if (lastSma > secondLastSma) {
+          if (lastEma > secondLastEma) {
               currentTrendColor = 'var(--win-color)'; // Trend positivo
-          } else if (lastSma < secondLastSma) {
+          } else if (lastEma < secondLastEma) {
               currentTrendColor = 'var(--loss-color)'; // Trend negativo
           }
         }
@@ -80,7 +93,7 @@ function App() {
     // 4. Combina i dati per il grafico
     const combinedData = balanceData.map((d, index) => ({
       ...d,
-      trend: smaData[index], // 'trend' ora è la Media Mobile
+      trend: emaData[index], // 'trend' ora è la EMA
     }));
     
     setLineChartData(combinedData);
