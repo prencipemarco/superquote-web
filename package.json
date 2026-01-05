@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.1",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.3",
+    "fs": "^0.0.1-security",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "recharts": "^3.3.0"

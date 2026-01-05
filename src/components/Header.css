@@ -1,20 +1,27 @@
 .app-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 15px 25px;
   background-color: var(--card-bg-color);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-medium);
   margin-bottom: 30px;
-  flex-wrap: wrap; /* Per responsività */
   gap: 15px;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  width: 100%;
 }
 
 .header-title h1 {
   margin: 0;
-  font-size: 1.8rem;
-  color: var(--secondary-color); /* Giallo/Oro */
+  font-size: 1.6rem;
+  color: var(--secondary-color);
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -22,24 +29,24 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 15px; /* Spazio tra i pulsanti */
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .header-button {
-  padding: 10px 18px;
+  padding: 8px 12px;
   border: none;
   border-radius: var(--border-radius-small);
   background-color: var(--input-bg-color);
   color: var(--text-color);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.1s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
-  text-decoration: none; /* Per l'ancora <a> */
+  gap: 6px;
+  text-decoration: none;
 }
 
 .header-button:hover {
@@ -47,54 +54,103 @@
   transform: translateY(-1px);
 }
 
-.header-button:active {
-  transform: translateY(0);
+/* Stili specifici */
+.header-button.bet-link {
+  background-color: var(--primary-color);
+  color: #fff;
 }
 
-/* Stili specifici */
-.header-button.bet-link { background-color: var(--primary-color); color: #fff; }
-.header-button.bet-link:hover { background-color: #289a49; }
-.header-button.google-sheets-link { background-color: #1A73E8; color: #fff; }
-.header-button.google-sheets-link:hover { background-color: #2b80f8; }
-.header-button.archive-button { background-color: var(--loss-color); color: #fff; }
-.header-button.archive-button:hover { background-color: #d32f2f; }
+.header-button.bet-link:hover {
+  background-color: #289a49;
+}
+
+.header-button.google-sheets-link {
+  background-color: #1A73E8;
+  color: #fff;
+}
+
+.header-button.google-sheets-link:hover {
+  background-color: #2b80f8;
+}
+
+.header-button.download-button {
+  background-color: var(--secondary-color);
+  color: #000;
+}
+
+.header-button.download-button:hover {
+  background-color: #dcb000;
+}
+
+.header-button.archive-button {
+  background-color: var(--loss-color);
+  color: #fff;
+}
+
+.header-button.archive-button:hover {
+  background-color: #d32f2f;
+}
 
 .header-button svg {
-  color: #fff;
-  flex-shrink: 0; /* Impedisce all'icona di rimpicciolirsi */
+  color: inherit;
+  flex-shrink: 0;
 }
 
-/* --- FIX PER IL MOBILE (NUOVO) --- */
+/* Bottom section (Countdown) */
+.header-bottom {
+  display: flex;
+  justify-content: flex-end;
+  /* Allinea a destra come richiesto anche se "in alto" */
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 10px;
+}
+
+.countdown-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-color-light);
+}
+
+.countdown-value {
+  color: var(--secondary-color);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .app-header {
+  .header-top {
     flex-direction: column;
-    align-items: center; /* Centra il titolo */
+    align-items: center;
   }
 
   .header-actions {
-    flex-direction: row; /* Rimette i pulsanti in linea */
-    justify-content: center; /* Centra la riga di pulsanti */
+    justify-content: center;
     width: 100%;
-    gap: 12px; /* Spazio tra i pulsanti quadrati */
   }
 
+  /* Pulsanti quadrati su mobile */
   .header-button {
-    width: 60px;  /* Larghezza fissa per il quadrato */
-    height: 60px; /* Altezza fissa per il quadrato */
-    padding: 0;   /* Rimuove il padding */
-    justify-content: center; /* Centra l'icona all'interno */
-    flex-grow: 0; /* Impedisce ai pulsanti di allargarsi */
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    justify-content: center;
   }
 
-  /* Nasconde il testo del pulsante */
   .header-button span {
     display: none;
   }
 
-  /* Centra l'icona (rimuovendo il gap) */
   .header-button svg {
+    width: 24px;
+    height: 24px;
     margin: 0;
-    width: 28px; /* Dimensione icona leggermente più grande */
-    height: 28px;
+  }
+
+  .header-bottom {
+    justify-content: center;
   }
 }

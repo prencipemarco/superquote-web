@@ -1,0 +1,250 @@
+.estimator-container {
+    background-color: var(--card-bg-color);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 30px;
+    border: none;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.analyzer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.verdict-badge {
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.estimator-container h3 {
+    margin-top: 0;
+    color: var(--text-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.estimator-desc {
+    font-size: 0.85rem;
+    color: var(--text-color-light);
+    margin-bottom: 25px;
+}
+
+.estimator-grid {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.input-group {
+    flex: 0 1 auto;
+    min-width: 140px;
+    max-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-color-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.input-group input,
+.input-group select {
+    padding: 10px 12px;
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--border-color);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 0.9rem;
+    width: 100%;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: var(--secondary-color);
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.loading-bar {
+    width: 100%;
+    text-align: center;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255, 223, 27, 0.1);
+    border-radius: var(--border-radius-small);
+}
+
+/* Debug Info Section */
+.debug-info {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius-small);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debug-info details {
+    cursor: pointer;
+}
+
+.debug-info summary {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+    padding: 5px 0;
+    user-select: none;
+}
+
+.debug-info summary:hover {
+    color: var(--text-color);
+}
+
+.debug-steps {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debug-step {
+    font-size: 0.85rem;
+    color: var(--text-color-light);
+    padding: 5px 0;
+    font-family: 'Courier New', monospace;
+    line-height: 1.6;
+}
+
+/* Results Area */
+.estimator-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-card {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 20px 15px;
+    border-radius: var(--border-radius-small);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.result-card.implied {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.result-card.historical {
+    border-color: rgba(255, 215, 0, 0.2);
+}
+
+.result-card.elo {
+    border-color: rgba(0, 191, 255, 0.2);
+}
+
+.result-card .label {
+    font-size: 0.75rem;
+    color: var(--text-color-light);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.result-card .value {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin: 5px 0;
+}
+
+.result-card .sub {
+    font-size: 0.7rem;
+    color: var(--text-color-light);
+    margin-top: 8px;
+}
+
+.value.good {
+    color: var(--win-color);
+}
+
+.value.neutral {
+    color: var(--text-color);
+}
+
+.value.warning {
+    color: var(--secondary-color);
+}
+
+.value.bad {
+    color: var(--loss-color);
+}
+
+.value.na {
+    color: #555;
+    font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .estimator-grid {
+        flex-direction: column;
+    }
+
+    .input-group {
+        max-width: 100%;
+    }
+
+    .estimator-results {
+        grid-template-columns: 1fr;
+    }
+}
