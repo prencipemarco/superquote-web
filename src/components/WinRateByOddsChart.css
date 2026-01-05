@@ -36,3 +36,20 @@
     padding: 20px;
     font-style: italic;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .chart-container {
+        padding: 15px;
+        margin: 30px auto 40px auto;
+    }
+
+    .chart-container h3 {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+
+    .chart-wrapper {
+        font-size: 0.85rem;
+    }
+}

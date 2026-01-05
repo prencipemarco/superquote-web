@@ -235,16 +235,88 @@
     font-size: 1.5rem;
 }
 
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
+    .estimator-container {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .analyzer-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .verdict-badge {
+        align-self: flex-start;
+        font-size: 0.8rem;
+        padding: 4px 10px;
+    }
+
+    .estimator-container h3 {
+        font-size: 1rem;
+    }
+
+    .estimator-desc {
+        font-size: 0.8rem;
+        margin-bottom: 20px;
+    }
+
     .estimator-grid {
         flex-direction: column;
+        gap: 15px;
     }
 
     .input-group {
         max-width: 100%;
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .input-group label {
+        font-size: 0.65rem;
+    }
+
+    .input-group input,
+    .input-group select {
+        font-size: 1rem;
+        padding: 12px;
+    }
+
+    .debug-info {
+        padding: 12px;
+        margin: 15px 0;
+    }
+
+    .debug-info summary {
+        font-size: 0.85rem;
+    }
+
+    .debug-step {
+        font-size: 0.8rem;
+        line-height: 1.5;
     }
 
     .estimator-results {
         grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .result-card {
+        padding: 15px 12px;
+    }
+
+    .result-card .label {
+        font-size: 0.7rem;
+    }
+
+    .result-card .value {
+        font-size: 1.8rem;
+    }
+
+    .result-card .sub {
+        font-size: 0.65rem;
     }
 }

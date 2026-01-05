@@ -1,25 +1,32 @@
 /* :root definisce le variabili CSS globali per il tema */
 :root {
   /* Tema ispirato a Bet365 */
-  --primary-color: #1E823A; /* Verde Bet365 */
+  --primary-color: #1E823A;
+  /* Verde Bet365 */
   --primary-color-rgb: 30, 130, 58;
-  --secondary-color: #FFDF1B; /* Giallo/Oro Bet365 */
-  
-  --bg-color: #121212; /* Sfondo molto scuro */
-  --card-bg-color: #282828; /* Grigio scuro per le card */
-  --input-bg-color: #333; /* Sfondo per input */
-  
-  --text-color: #E0E0E0; /* Testo quasi bianco */
-  --text-color-light: #B0B0B0; /* Testo più scuro per label e placeholder */
-  
+  --secondary-color: #FFDF1B;
+  /* Giallo/Oro Bet365 */
+
+  --bg-color: #121212;
+  /* Sfondo molto scuro */
+  --card-bg-color: #282828;
+  /* Grigio scuro per le card */
+  --input-bg-color: #333;
+  /* Sfondo per input */
+
+  --text-color: #E0E0E0;
+  /* Testo quasi bianco */
+  --text-color-light: #B0B0B0;
+  /* Testo più scuro per label e placeholder */
+
   --win-color: #4caf50;
   --loss-color: #f44336;
   --pending-color: #ff9800;
-  
+
   --border-color: #444;
   --shadow-small: 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.3);
-  
+
   --border-radius: 12px;
   --border-radius-small: 8px;
 }
@@ -71,13 +78,16 @@ h2 {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-color);
 }
+
 ::-webkit-scrollbar-thumb {
   background: #555;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #777;
 }
@@ -85,14 +95,32 @@ h2 {
 /* Nuovo stile per la griglia dei grafici */
 .charts-grid {
   display: grid;
-  grid-template-columns: 1fr 2fr; /* Torta 1/3, Barre 2/3 */
-  gap: 20px; /* Spazio tra i grafici */
-  margin-top: 20px; /* Distanza dal grafico a linee */
+  grid-template-columns: 1fr 2fr;
+  /* Torta 1/3, Barre 2/3 */
+  gap: 20px;
+  /* Spazio tra i grafici */
+  margin-top: 20px;
+  /* Distanza dal grafico a linee */
 }
 
+/* Mobile Responsive Styles */
 @media (max-width: 900px) {
   .charts-grid {
-    grid-template-columns: 1fr; /* Una colonna su schermi più piccoli */
+    grid-template-columns: 1fr;
+    /* Una colonna su schermi più piccoli */
   }
 }
 
+@media (max-width: 768px) {
+  .app-container {
+    padding: 15px;
+  }
+
+  main {
+    gap: 20px;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+}
