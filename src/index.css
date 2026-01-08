@@ -7,6 +7,12 @@
   --secondary-color: #FFDF1B;
   /* Giallo/Oro Bet365 */
 
+  --color-primary: #1e90ff;
+  --color-secondary: #ff7f50;
+  --color-background: #f5f7fa;
+  --color-text: #212529;
+  --color-accent: #ffcc00;
+
   --bg-color: #121212;
   /* Sfondo molto scuro */
   --card-bg-color: #282828;

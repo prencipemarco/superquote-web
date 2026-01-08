@@ -92,6 +92,8 @@
 }
 
 .header-button svg {
+  width: 20px;
+  height: 20px;
   color: inherit;
   flex-shrink: 0;
 }
@@ -132,23 +134,63 @@
     width: 100%;
   }
 
-  /* Pulsanti quadrati su mobile */
-  .header-button {
-    width: 50px;
-    height: 50px;
+  /* Target both buttons AND links inside header-actions */
+  .header-actions>* {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    margin: 0 2px;
+    /* Reduced margin to fit 6 items */
     padding: 0;
     justify-content: center;
+    overflow: hidden;
+    /* Critical for hiding text */
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    /* Prevent shrinking below min-width */
+    border-radius: 4px;
+    /* Optional: slight rounding for better look */
   }
 
-  .header-button span {
-    display: none;
-  }
-
-  .header-button svg {
-    width: 24px;
-    height: 24px;
+  /* Force SVG size back to small (20px) per user request */
+  .header-actions>* svg {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
     margin: 0;
   }
+
+  /* Hide text spans specifically */
+  .header-actions>* span {
+    display: none !important;
+  }
+
+  /* Ensure overrides apply to specific button classes too */
+  .header-actions .header-button,
+  .header-actions a,
+  .header-actions button {
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    margin: 0 2px !important;
+  }
+
+  /* Force SVG size back to small (20px) PER TUTTI */
+  .header-actions>* svg,
+  .header-button svg {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    margin: 0 !important;
+  }
+
 
   .header-bottom {
     justify-content: center;

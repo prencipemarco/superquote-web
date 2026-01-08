@@ -10,6 +10,7 @@ import OutcomePieChart from './components/OutcomePieChart';
 import MonthlyBarChart from './components/MonthlyBarChart';
 import WinRateByOddsChart from './components/WinRateByOddsChart';
 import WinProbabilityEstimator from './components/WinProbabilityEstimator';
+import PasswordProtection from './components/PasswordProtection';
 import './index.css';
 
 function App() {
@@ -382,47 +383,49 @@ function App() {
   };
 
   return (
-    <div className="app-container">
-      <Header
-        onImport={handleImportPlays}
-        onArchive={handleArchiveAndClear}
-        onDownload={handleDownloadData}
-        onReset={handleResetData}
-      />
-      <main>
-        <section className="dashboard-section">
-          <StatsDashboard
-            plays={plays}
-            totalPlaysCount={totalPlaysCount}
-          />
-          <PlaysChart data={lineChartData} trendColor={trendColor} />
-          <div className="charts-grid">
-            <OutcomePieChart data={pieChartData} />
-            <MonthlyBarChart data={barChartData} />
-          </div>
-          <WinRateByOddsChart data={winRateChartData} />
-        </section>
+    <PasswordProtection>
+      <div className="app-container">
+        <Header
+          onImport={handleImportPlays}
+          onArchive={handleArchiveAndClear}
+          onDownload={handleDownloadData}
+          onReset={handleResetData}
+        />
+        <main>
+          <section className="dashboard-section">
+            <StatsDashboard
+              plays={plays}
+              totalPlaysCount={totalPlaysCount}
+            />
+            <PlaysChart data={lineChartData} trendColor={trendColor} />
+            <div className="charts-grid">
+              <OutcomePieChart data={pieChartData} />
+              <MonthlyBarChart data={barChartData} />
+            </div>
+            <WinRateByOddsChart data={winRateChartData} />
+          </section>
 
-        <section ref={formSectionRef} className="form-section">
-          <WinProbabilityEstimator />
-          <AddPlayForm
-            onAddPlay={handleAddPlay}
-            onUpdatePlay={handleUpdatePlay}
-            editingPlay={editingPlay}
-            setEditingPlay={setEditingPlay}
-          />
-        </section>
+          <section ref={formSectionRef} className="form-section">
+            <WinProbabilityEstimator />
+            <AddPlayForm
+              onAddPlay={handleAddPlay}
+              onUpdatePlay={handleUpdatePlay}
+              editingPlay={editingPlay}
+              setEditingPlay={setEditingPlay}
+            />
+          </section>
 
-        <section className="list-section">
-          <Filters onFilterChange={handleFilterChange} />
-          <PlaysList
-            plays={plays}
-            onEdit={handleEditClick}
-            onDelete={handleDeletePlay}
-          />
-        </section>
-      </main>
-    </div>
+          <section className="list-section">
+            <Filters onFilterChange={handleFilterChange} />
+            <PlaysList
+              plays={plays}
+              onEdit={handleEditClick}
+              onDelete={handleDeletePlay}
+            />
+          </section>
+        </main>
+      </div>
+    </PasswordProtection>
   );
 }
 

@@ -40,6 +40,14 @@ fs.createReadStream('src/dataset/Matches.csv')
                 ft_result: data.FTResult,
                 ft_home: parseFloat(data.FTHome) || null,
                 ft_away: parseFloat(data.FTAway) || null,
+                ht_home: parseInt(data.HTHome) || null,
+                ht_away: parseInt(data.HTAway) || null,
+                home_corners: parseInt(data.HomeCorners) || null,
+                away_corners: parseInt(data.AwayCorners) || null,
+                home_yellow: parseInt(data.HomeYellow) || null,
+                away_yellow: parseInt(data.AwayYellow) || null,
+                home_red: parseInt(data.HomeRed) || null,
+                away_red: parseInt(data.AwayRed) || null,
                 division: data.Division
             });
         }

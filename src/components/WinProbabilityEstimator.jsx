@@ -10,6 +10,7 @@ function SuperquoteAnalyzer() {
     const [estimation, setEstimation] = useState(null);
     const [loading, setLoading] = useState(false);
     const [debugInfo, setDebugInfo] = useState(null);
+    const [detailedStats, setDetailedStats] = useState(null);
 
     useEffect(() => {
         const fetchEstimation = async () => {
@@ -17,10 +18,31 @@ function SuperquoteAnalyzer() {
             if (!homeTeam && !awayTeam) {
                 setEstimation(null);
                 setDebugInfo(null);
+                setDetailedStats(null);
                 return;
             }
 
+            // VALIDAZIONE: Impedisci stessa squadra vs se stessa
+            if (homeTeam && awayTeam && homeTeam.trim().toLowerCase() === awayTeam.trim().toLowerCase()) {
+                // CLEAR EVERYTHING to prevent sticky results
+                setEstimation(null);
+                setDetailedStats(null);
+                setDebugInfo({
+                    steps: ['❌ ERRORE: Una squadra non può giocare contro se stessa!']
+                });
+
+                // FORCE ERROR MESSAGE DISPLAY via explicit object
+                setEstimation({
+                    noDataInfo: true,
+                    message: "Una squadra non può giocare contro se stessa! Inserisci due squadre diverse."
+                });
+
+                setLoading(false);
+                return; // STOP EXECUTION
+            }
+
             setLoading(true);
+            setEstimation(null); // Clear previous results before new fetch
             const targetQuota = oddsInput ? parseFloat(oddsInput) : null;
             const debug = { steps: [] };
 
@@ -39,52 +61,76 @@ function SuperquoteAnalyzer() {
                 if (homeTeam && awayTeam) {
                     const { data, error } = await supabase
                         .from('historical_matches')
-                        .select('ft_result, ft_home, ft_away, match_date, home_team, away_team')
-                        .ilike('home_team', `%${homeTeam}%`)
-                        .ilike('away_team', `%${awayTeam}%`)
+                        .select('ft_result, ft_home, ft_away, ht_home, ht_away, home_corners, away_corners, home_yellow, away_yellow, home_red, away_red, match_date, home_team, away_team')
+                        .or(`and(home_team.ilike.%${homeTeam}%,away_team.ilike.%${awayTeam}%),and(home_team.ilike.%${awayTeam}%,away_team.ilike.%${homeTeam}%)`)
                         .order('match_date', { ascending: false });
 
                     if (error) {
                         debug.steps.push(`❌ Errore database: ${error.message}`);
                     } else if (data) {
-                        h2hMatches = data;
+                        // DEDUPLICAZIONE IMMEDIATA (Fix per righe doppie)
+                        const seen = new Set();
+                        h2hMatches = data.filter(m => {
+                            // Chiave univoca basata su data e squadre
+                            const key = `${m.match_date}_${m.home_team}_${m.away_team}`;
+                            if (seen.has(key)) return false;
+                            seen.add(key);
+                            return true;
+                        });
+
                         debug.steps.push(`✓ Trovati ${h2hMatches.length} scontri diretti`);
+                        if (h2hMatches.length > 0) {
+                            debug.steps.push(`📅 Date recenti trovate: ${h2hMatches.slice(0, 3).map(m => m.match_date).join(', ')}`);
+                        }
                     }
                 }
 
                 let analyzedMatches = [];
 
-                // STEP 2: Decidi quale dataset usare
-                if (h2hMatches.length >= 3) {
+                // STEP 1.1: Filtra i risultati per evitare falsi positivi (es. "Inter Milan" cercando "Milan")
+                if (h2hMatches.length > 0) {
+                    h2hMatches = h2hMatches.filter(m => {
+                        const h = m.home_team.toLowerCase();
+                        const a = m.away_team.toLowerCase();
+                        const searchH = homeTeam.toLowerCase().trim();
+                        const searchA = awayTeam.toLowerCase().trim();
+
+                        // Se cerchi "Milan", escludi "Inter"
+                        if (searchH === 'milan' && h.includes('inter')) return false;
+                        if (searchA === 'milan' && a.includes('inter')) return false;
+
+                        return true;
+                    });
+                }
+
+                // STEP 2: Logica Rigorosa - Priorità H2H o Stop
+                if (h2hMatches.length > 0) {
                     analyzedMatches = h2hMatches;
                     analysisType = 'H2H';
-                    dataSource = `${h2hMatches.length} scontri diretti`;
-                    debug.steps.push(`✅ Uso scontri diretti (${h2hMatches.length} partite)`);
-                } else if (h2hMatches.length > 0 && h2hMatches.length < 3) {
-                    debug.steps.push(`⚠️ Solo ${h2hMatches.length} scontri diretti (servono almeno 3)`);
-                    debug.steps.push(`🔄 Passo alla forma generale della squadra di casa...`);
-                }
+                    dataSource = `Scontri Diretti (${h2hMatches.length} match)`;
+                    debug.steps.push(`✅ Uso ${h2hMatches.length} scontri diretti trovati.`);
 
-                // STEP 3: Fallback su forma casa
-                if (analyzedMatches.length === 0 && homeTeam && homeTeam.length > 2) {
-                    const { data: homeMatches, error } = await supabase
-                        .from('historical_matches')
-                        .select('ft_result, ft_home, ft_away, home_team')
-                        .ilike('home_team', `%${homeTeam}%`)
-                        .order('match_date', { ascending: false })
-                        .limit(50);
-
-                    if (error) {
-                        debug.steps.push(`❌ Errore nel recupero forma casa: ${error.message}`);
-                    } else if (homeMatches && homeMatches.length > 0) {
-                        analyzedMatches = homeMatches;
-                        analysisType = 'Forma Casa';
-                        dataSource = `${homeMatches.length} partite in casa`;
-                        debug.steps.push(`✓ Trovate ${homeMatches.length} partite in casa di ${homeTeam}`);
-                    } else {
-                        debug.steps.push(`❌ Nessuna partita trovata per "${homeTeam}"`);
+                    if (h2hMatches.length < 3) {
+                        debug.steps.push(`⚠️ Attenzione: Pochi dati (${h2hMatches.length}), analisi meno affidabile.`);
                     }
+                } else {
+                    // NESSUN match H2H trovato
+                    debug.steps.push(`❌ Nessuno scontro diretto trovato tra ${homeTeam} e ${awayTeam}.`);
+                    debug.steps.push(`ℹ️ L'analisi richiede scontri diretti per essere precisa. Fallback automatico disabilitato per evitare confusione.`);
+
+                    // Mostra messaggio errore/info all'utente invece di dati a caso
+                    setEstimation({
+                        noDataInfo: true,
+                        message: "Nessuno scontro diretto recente trovato. Prova con squadre diverse o controlla i nomi."
+                    });
+                    setDetailedStats(null); // Fix: Clear stats to avoid showing contradictory data
+                    setLoading(false);
+                    return;
                 }
+
+                // STEP 3: Fallback RIMOSSO (Forma Casa non verrà usata se mancano H2H)
+                // Questo evita che Juve-Juve mostri le partite in casa della Juve
+
 
                 // STEP 4: Calcola statistiche se abbiamo dati
                 if (analyzedMatches.length > 0) {
@@ -129,8 +175,54 @@ function SuperquoteAnalyzer() {
                     if (sampleSize < 10) {
                         debug.steps.push(`⚠️ ATTENZIONE: Campione molto piccolo (${sampleSize} partite)`);
                     }
+
+                    // CALCOLA STATISTICHE DETTAGLIATE
+                    const validMatches = analyzedMatches.filter(m =>
+                        m.ft_home != null && m.ft_away != null
+                    );
+
+                    if (validMatches.length > 0) {
+                        const avg = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : 0;
+
+                        // Rimuovi duplicati basandoti su data + score
+                        const uniqueMatches = [];
+                        const seen = new Set();
+
+                        for (const match of validMatches) {
+                            const key = `${match.match_date}-${match.ft_home}-${match.ft_away}`;
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                uniqueMatches.push(match);
+                            }
+                        }
+
+                        const stats = {
+                            avgHomeCorners: avg(validMatches.map(m => m.home_corners || 0)),
+                            avgAwayCorners: avg(validMatches.map(m => m.away_corners || 0)),
+                            avgHomeYellow: avg(validMatches.map(m => m.home_yellow || 0)),
+                            avgAwayYellow: avg(validMatches.map(m => m.away_yellow || 0)),
+                            avgHomeRed: avg(validMatches.map(m => m.home_red || 0)),
+                            avgAwayRed: avg(validMatches.map(m => m.away_red || 0)),
+                            avgTotalGoals: avg(validMatches.map(m => (m.ft_home || 0) + (m.ft_away || 0))),
+                            avgFirstHalfGoals: avg(validMatches.map(m => (m.ht_home || 0) + (m.ht_away || 0))),
+                            avgSecondHalfGoals: avg(validMatches.map(m =>
+                                ((m.ft_home || 0) + (m.ft_away || 0)) - ((m.ht_home || 0) + (m.ht_away || 0))
+                            )),
+                            lastResults: uniqueMatches.slice(0, 5).map(m => ({
+                                date: m.match_date,
+                                score: `${m.ft_home || 0}-${m.ft_away || 0}`,
+                                result: m.ft_result,
+                                homeTeam: m.home_team,
+                                awayTeam: m.away_team
+                            }))
+                        };
+
+                        setDetailedStats(stats);
+                        debug.steps.push(`📈 Statistiche dettagliate calcolate su ${validMatches.length} partite`);
+                    }
                 } else {
                     debug.steps.push(`❌ Nessun dato disponibile per l'analisi`);
+                    setDetailedStats(null);
                 }
 
                 // STEP 5: Calcola Elo (solo per 1X2)
@@ -328,7 +420,12 @@ function SuperquoteAnalyzer() {
                 </div>
             )}
 
-            {estimation && !loading && (
+            {estimation && estimation.noDataInfo && !loading ? (
+                <div className="no-data-message" style={{ padding: '20px', textAlign: 'center', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', marginTop: '20px' }}>
+                    <h3 style={{ color: 'var(--secondary-color)', marginBottom: '10px' }}>⚠️ Nessun Risultato Trovato</h3>
+                    <p style={{ color: 'var(--text-color)' }}>{estimation.message}</p>
+                </div>
+            ) : (estimation && !loading && (
                 <div className="estimator-results">
                     {/* Quota Bookmaker */}
                     <div className="result-card implied">
@@ -381,6 +478,82 @@ function SuperquoteAnalyzer() {
                                 <span className="sub">Solo per 1X2</span>
                             </>
                         )}
+                    </div>
+                </div>
+            ))}
+
+            {/* Detailed Statistics Section */}
+            {detailedStats && !loading && (
+                <div className="detailed-stats-section">
+                    <h4>📊 Statistiche Dettagliate</h4>
+
+                    <div className="stats-grid">
+                        {/* Last Results */}
+                        <div className="stat-card">
+                            <div className="stat-header">🏆 Ultimi Risultati</div>
+                            <div className="last-results">
+                                {detailedStats.lastResults.map((result, idx) => (
+                                    <div key={idx} className="result-item">
+                                        <span className="result-date">{result.date}</span>
+                                        <span className="result-score">
+                                            {result.score}
+                                            {result.result === 'H' && ' 🟢'}
+                                            {result.result === 'D' && ' 🟡'}
+                                            {result.result === 'A' && ' 🔴'}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Goals by Half */}
+                        <div className="stat-card">
+                            <div className="stat-header">⚽ Goal per Tempo</div>
+                            <div className="stat-rows">
+                                <div className="stat-row">
+                                    <span>Primo Tempo:</span>
+                                    <strong>{detailedStats.avgFirstHalfGoals} goal/partita</strong>
+                                </div>
+                                <div className="stat-row">
+                                    <span>Secondo Tempo:</span>
+                                    <strong>{detailedStats.avgSecondHalfGoals} goal/partita</strong>
+                                </div>
+                                <div className="stat-row total">
+                                    <span>Totale:</span>
+                                    <strong>{detailedStats.avgTotalGoals} goal/partita</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Corners */}
+                        <div className="stat-card">
+                            <div className="stat-header">🚩 Angoli</div>
+                            <div className="stat-rows">
+                                <div className="stat-row">
+                                    <span>{homeTeam || 'Casa'}:</span>
+                                    <strong>{detailedStats.avgHomeCorners} angoli/partita</strong>
+                                </div>
+                                <div className="stat-row">
+                                    <span>{awayTeam || 'Ospite'}:</span>
+                                    <strong>{detailedStats.avgAwayCorners} angoli/partita</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cards */}
+                        <div className="stat-card">
+                            <div className="stat-header">🟨 Cartellini</div>
+                            <div className="stat-rows">
+                                <div className="stat-row">
+                                    <span>{homeTeam || 'Casa'}:</span>
+                                    <strong>{detailedStats.avgHomeYellow} 🟨 {detailedStats.avgHomeRed} 🟥</strong>
+                                </div>
+                                <div className="stat-row">
+                                    <span>{awayTeam || 'Ospite'}:</span>
+                                    <strong>{detailedStats.avgAwayYellow} 🟨 {detailedStats.avgAwayRed} 🟥</strong>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
