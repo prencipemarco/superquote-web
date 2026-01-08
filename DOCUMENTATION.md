@@ -53,6 +53,7 @@ Mostra il titolo dell'app e contiene i pulsanti per le azioni globali: link a Be
 **Props:**
 - `onImport`: Funzione callback attivata al click su "Importa CSV".
 - `onArchive`: Funzione callback attivata al click su "Archivia e Svuota".
+- **Responsive**: Su mobile (< 768px), i pulsanti vengono ridimensionati a quadrati di 44px con icone centralizzate da 20px, nascondendo le etichette di testo per ottimizzare lo spazio.
 
 ### `src/components/StatsDashboard.jsx`
 Cruscotto riassuntivo delle statistiche principali.
@@ -165,3 +166,40 @@ Confronta l'importo scommesso e l'importo vinto per ogni mese.
 
 **Dettagli:**
 - Mostra due barre per ogni mese: una per l'importo giocato (colore rosso/loss) e una per la vincita (colore verde/win).
+
+### `src/components/WinProbabilityEstimator.jsx`
+Componente principale per l'analisi predittiva delle partite (Superquote Analyzer).
+
+**Descrizione:**
+Calcola la probabilità di vittoria e fornisce statistiche dettagliate basandosi sullo storico degli scontri diretti (H2H) e sul rating Elo.
+
+**Stato (State):**
+- `homeTeam`, `awayTeam`: Input squadre.
+- `oddsInput`: Quota inserita dall'utente.
+- `estimation`: Oggetto contenente i risultati dell'analisi (win rate, elo, verdetto).
+- `detailedStats`: Statistiche avanzate (corner, goal per tempo, cartellini).
+- `debugInfo`: Log dettagliato dei passaggi eseguiti dall'algoritmo (visibile espandendo "Mostra ragionamento dettagliato").
+
+**Funzioni Core:**
+- `fetchEstimation()`:
+  - Interroga Supabase per trovare match storici tra le due squadre (query `OR` bidirezionale).
+  - **Deduplicazione**: Rimuove duplicati basandosi su data+squadre per garantire pulizia dati.
+  - **Validazione**: Blocca la ricerca se le squadre sono identiche.
+  - **Fallback**: Se non trova scontri diretti, mostra un errore specifico e disabilita le statistiche (non fa più fallback sulla forma casa per evitare dati fuorvianti).
+  - Calcola Elo e Edge (differenza tra probabilità reale e implicita).
+
+---
+
+## 3. Scripts
+
+### `scripts/ingest_matches.js`
+Script Node.js per l'ingestione massiva dei dati storici.
+
+**Uso:**
+`node scripts/ingest_matches.js`
+
+**Funzionamento:**
+1. Legge il file `src/dataset/Matches.csv`.
+2. Converte ogni riga in oggetto JSON compatibile con lo schema Supabase.
+3. Esegue un `upsert` (inserimento o aggiornamento) in batch su Supabase per popolare la tabella `historical_matches`.
+
