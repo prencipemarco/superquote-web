@@ -142,9 +142,15 @@ function SuperquoteAnalyzer() {
                         const homeGoals = parseFloat(m.ft_home) || 0;
                         const awayGoals = parseFloat(m.ft_away) || 0;
 
+                        const htHome = parseFloat(m.ht_home) || 0;
+                        const htAway = parseFloat(m.ht_away) || 0;
+
                         if (outcome === '1' && m.ft_result === 'H') wins++;
                         else if (outcome === 'X' && m.ft_result === 'D') wins++;
                         else if (outcome === '2' && m.ft_result === 'A') wins++;
+                        else if (outcome === '1HT' && htHome > htAway) wins++;
+                        else if (outcome === 'XHT' && htHome === htAway) wins++;
+                        else if (outcome === '2HT' && htAway > htHome) wins++;
                         else if (outcome === '1X' && (m.ft_result === 'H' || m.ft_result === 'D')) wins++;
                         else if (outcome === 'X2' && (m.ft_result === 'A' || m.ft_result === 'D')) wins++;
                         else if (outcome === '12' && (m.ft_result === 'H' || m.ft_result === 'A')) wins++;
@@ -161,6 +167,9 @@ function SuperquoteAnalyzer() {
                         '1': 'Vittoria Casa',
                         'X': 'Pareggio',
                         '2': 'Vittoria Ospite',
+                        '1HT': '1° Tempo: Casa',
+                        'XHT': '1° Tempo: Pareggio',
+                        '2HT': '1° Tempo: Ospite',
                         '1X': 'Doppia Chance 1X',
                         'X2': 'Doppia Chance X2',
                         '12': 'Doppia Chance 12',
@@ -169,6 +178,7 @@ function SuperquoteAnalyzer() {
                         'GG': 'Goal',
                         'NG': 'No Goal'
                     }[outcome] || outcome;
+
 
                     debug.steps.push(`📊 Esito "${outcomeLabel}": ${wins}/${total} = ${teamWinRate}%`);
 
@@ -383,6 +393,9 @@ function SuperquoteAnalyzer() {
                         <option value="1">1 (Casa Vince)</option>
                         <option value="X">X (Pareggio)</option>
                         <option value="2">2 (Ospite Vince)</option>
+                        <option value="1HT">1 Primo T. (Casa)</option>
+                        <option value="XHT">X Primo T. (Pareggio)</option>
+                        <option value="2HT">2 Primo T. (Ospite)</option>
                         <option value="1X">1X (Doppia Chance)</option>
                         <option value="X2">X2 (Doppia Chance)</option>
                         <option value="12">12 (Doppia Chance)</option>
