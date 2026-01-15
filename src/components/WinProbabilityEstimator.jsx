@@ -11,6 +11,7 @@ function SuperquoteAnalyzer() {
     const [loading, setLoading] = useState(false);
     const [debugInfo, setDebugInfo] = useState(null);
     const [detailedStats, setDetailedStats] = useState(null);
+    const [goalLine, setGoalLine] = useState(2.5); // Default 2.5
 
     useEffect(() => {
         const fetchEstimation = async () => {
@@ -43,7 +44,9 @@ function SuperquoteAnalyzer() {
 
             setLoading(true);
             setEstimation(null); // Clear previous results before new fetch
+            setEstimation(null); // Clear previous results before new fetch
             const targetQuota = oddsInput ? parseFloat(oddsInput) : null;
+            const threshold = parseFloat(goalLine);
             const debug = { steps: [] };
 
             try {
@@ -154,8 +157,8 @@ function SuperquoteAnalyzer() {
                         else if (outcome === '1X' && (m.ft_result === 'H' || m.ft_result === 'D')) wins++;
                         else if (outcome === 'X2' && (m.ft_result === 'A' || m.ft_result === 'D')) wins++;
                         else if (outcome === '12' && (m.ft_result === 'H' || m.ft_result === 'A')) wins++;
-                        else if (outcome === 'O2.5' && (homeGoals + awayGoals > 2.5)) wins++;
-                        else if (outcome === 'U2.5' && (homeGoals + awayGoals < 2.5)) wins++;
+                        else if (outcome === 'Over' && (homeGoals + awayGoals > threshold)) wins++;
+                        else if (outcome === 'Under' && (homeGoals + awayGoals < threshold)) wins++;
                         else if (outcome === 'GG' && (homeGoals > 0 && awayGoals > 0)) wins++;
                         else if (outcome === 'NG' && (homeGoals === 0 || awayGoals === 0)) wins++;
                     });
@@ -173,8 +176,8 @@ function SuperquoteAnalyzer() {
                         '1X': 'Doppia Chance 1X',
                         'X2': 'Doppia Chance X2',
                         '12': 'Doppia Chance 12',
-                        'O2.5': 'Over 2.5',
-                        'U2.5': 'Under 2.5',
+                        'Over': `Over ${threshold}`,
+                        'Under': `Under ${threshold}`,
                         'GG': 'Goal',
                         'NG': 'No Goal'
                     }[outcome] || outcome;
@@ -351,7 +354,8 @@ function SuperquoteAnalyzer() {
 
         const timeoutId = setTimeout(fetchEstimation, 800);
         return () => clearTimeout(timeoutId);
-    }, [oddsInput, homeTeam, awayTeam, outcome]);
+
+    }, [oddsInput, homeTeam, awayTeam, outcome, goalLine]);
 
     return (
         <div className="estimator-container">
@@ -399,11 +403,32 @@ function SuperquoteAnalyzer() {
                         <option value="1X">1X (Doppia Chance)</option>
                         <option value="X2">X2 (Doppia Chance)</option>
                         <option value="12">12 (Doppia Chance)</option>
-                        <option value="O2.5">Over 2.5</option>
-                        <option value="U2.5">Under 2.5</option>
+                        <option value="Over">Over (Goal)</option>
+                        <option value="Under">Under (Goal)</option>
                         <option value="GG">Goal</option>
                         <option value="NG">No Goal</option>
                     </select>
+
+                    {/* Show Goal Line input mainly for Over/Under */}
+                    {['Over', 'Under'].includes(outcome) && (
+                        <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <label style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Soglia:</label>
+                            <input
+                                type="number"
+                                step="0.5"
+                                value={goalLine}
+                                onChange={(e) => setGoalLine(e.target.value)}
+                                style={{
+                                    padding: '4px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #444',
+                                    backgroundColor: '#333',
+                                    color: 'white',
+                                    width: '60px'
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
                 <div className="input-group">
                     <label>Quota (opzionale)</label>
